@@ -4,6 +4,7 @@ import NavBar from '../components/NavBar'
 import { useRouter } from 'next/router'
 
 
+
 export default function Chronik() {
   const [note, setNote] = useState('')         // In-Character
   const [flow, setFlow] = useState('')         // Klartext
@@ -135,9 +136,6 @@ async function handleDelete(id) {
               <p><strong>Ort:</strong> {entry.ort}</p>
               <p><strong>Tags:</strong> {entry.tags?.join(', ')}</p>
               <p className="italic text-gray-700 mt-1">„{entry.note?.slice(0, 100)}…“</p>
-              <button onClick={() => toggleFlow(entry.id)} className="text-sm text-blue-600 underline mt-2">
-                {visibleFlowIds.includes(entry.id) ? 'Klartext verbergen' : 'Klartext anzeigen'}
-              </button>
               {visibleFlowIds.includes(entry.id) && (
                 <p className="mt-2 text-gray-800 whitespace-pre-line">{entry.flow}</p>
               )}
