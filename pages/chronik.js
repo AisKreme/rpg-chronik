@@ -6,7 +6,8 @@ import ChronikPage from '../components/ChronikPage'
 import HTMLFlipBook from 'react-pageflip'
 import EntryPopup from '../components/EntryPopup'
 import Inhaltsverzeichnis from '../components/Inhaltsverzeichnis'
-
+import TimelinePage from '../components/TimelinePage'
+import NSCPage from './nscs'
 
 
 export default function Chronik() {
@@ -33,7 +34,89 @@ export default function Chronik() {
     return text.toLowerCase().includes(suchbegriff.toLowerCase())
   })
 
-  
+  const [nscs, setNSCs] = useState([])
+    const [entryType, setEntryType] = useState('chronik') // Standard: Chronik-Eintrag
+    const [selectedNSC, setSelectedNSC] = useState(null)
+
+    const [name, setName] = useState('')
+    const [rolle, setRolle] = useState('')
+    const [info, setInfo] = useState('')
+    const [editNSCId, setEditNSCId] = useState(null)
+
+    useEffect(() => {
+      fetchEntries()
+      fetchNSCs()
+    }, [])
+
+    async function fetchNSCs() {
+      const { data, error } = await supabase
+        .from('nscs')
+        .select('*')
+        .order('created_at', { ascending: true })
+      if (!error) setNSCs(data)
+    }
+
+      async function handleNSCSubmit(e) {
+        e.preventDefault()
+
+        if (!name) return alert('Name fehlt.')
+
+        // 🆕 Neuen NSC speichern (ohne Bilder erstmal)
+        const { data, error } = await supabase
+          .from('nscs')
+          .insert({
+            name,
+            rolle,
+            info,
+            images: [], // Platzhalter – wird gleich aktualisiert
+          })
+          .select()
+          .single()
+
+        if (error) {
+          alert('Fehler beim Speichern: ' + error.message)
+          return
+        }
+
+        const newId = data.id.toString()
+
+        // 📦 Bilder aus temp/ nach nscs/<neueId>/ verschieben
+        const newImageUrls = await Promise.all(
+          images.map(async (url) => {
+            const fileName = url.split('/').pop()
+            const fromPath = `temp/${fileName}`
+            const toPath = `nscs/${newId}/${fileName}`
+
+            const { error: moveError } = await supabase.storage
+              .from('chronik')
+              .move(fromPath, toPath)
+
+            if (moveError) {
+              console.warn('Fehler beim Verschieben:', moveError)
+              return url
+            }
+
+            const { data: publicData } = supabase.storage
+              .from('chronik')
+              .getPublicUrl(toPath)
+
+            return publicData.publicUrl
+          })
+        )
+
+  // 🔁 NSC-Eintrag aktualisieren mit echten Bildpfaden
+  await supabase
+    .from('nscs')
+    .update({ images: newImageUrls })
+    .eq('id', newId)
+
+  // 🧹 Felder zurücksetzen
+  setName('')
+  setRolle('')
+  setInfo('')
+  setImages([])
+}
+
 
 
   useEffect(() => {
@@ -66,8 +149,20 @@ function handleEdit(entry) {
   setKapitel(entry.kapitel || '')
   setOrt(entry.ort || '')
   setTags(entry.tags?.join(', ') || '')
-  setShowPopup(true) 
+  setShowPopup(true)
 }
+
+
+function openNewEntryPopup(type = 'chronik') {
+  setEntryType(type)
+  if (type === 'chronik' && !editId) {
+    const letztesKapitel = entries[entries.length - 1]?.kapitel || ''
+    setKapitel(letztesKapitel)
+  }
+  setSelectedNSC(null)
+  setShowPopup(true)
+}
+
 
   async function handleDelete(id) {
     if (!confirm('Eintrag wirklich löschen?')) return
@@ -123,7 +218,6 @@ function handleEdit(entry) {
 
       if (error) alert('Fehler beim Aktualisieren: ' + error.message)
       else {
-        alert('Eintrag aktualisiert!')
         resetForm()
       }
     } else {
@@ -135,7 +229,6 @@ function handleEdit(entry) {
 
       if (error) alert('Fehler: ' + error.message)
       else {
-        alert('Eintrag gespeichert! ID: ' + data.id)
         resetForm()
       }
     }
@@ -154,7 +247,23 @@ function handleEdit(entry) {
   pages.push({ id: 'inhalt', note: '📖 Inhaltsverzeichnis', flow: '', ort: '', kapitel: '', tags: [] })
 
   // ➤ Hauptseiten: Chronik-Einträge
-  pages.push(...gefilterteEintraege)
+    pages.push(...gefilterteEintraege.map(e => ({ ...e, typ: 'chronik' })))
+
+    // ➤ NSCs als Seiten danach
+    // ➤ NSCs in Gruppen zu je 2 verpacken
+      const nscGroups = []
+      for (let i = 0; i < nscs.length; i += 2) {
+        nscGroups.push(nscs.slice(i, i + 2))
+      }
+
+      // ➤ Jede Gruppe wird eine Seite im Flipbook
+      pages.push(...nscGroups.map((gruppe, index) => ({
+        id: `nsc-page-${index}`,
+        typ: 'nsc',
+        gruppe
+      })))
+
+    const ersteNSCSeite = pages.findIndex(p => p?.typ === 'nsc')
 
   // ➤ ggf. Leerseite einfügen, damit Timeline auf linker Seite erscheint
   const totalWithoutTimeline = pages.length
@@ -170,14 +279,12 @@ function handleEdit(entry) {
       const letzteChronikSeite = pages.findIndex(p => p?.id === entries.at(-1)?.id)
 
       // ➤ Jetzt Mapping aufbauen
-      const seitenIndexMap = new Map()
-      let pageCounter = 1
-      pages.forEach((entry, i) => {
-        if (entry && entry.id && entry.id !== 'inhalt' && entry.id !== 'timeline') {
-          seitenIndexMap.set(entry.id, pageCounter)
-        }
-        pageCounter++
-      })
+        const seitenIndexMap = new Map()
+        pages.forEach((entry, i) => {
+          if (entry && entry.id && entry.id !== 'inhalt' && entry.id !== 'timeline') {
+            seitenIndexMap.set(entry.id, i)
+          }
+        })
     function geheZuSeite(nr) {
       bookRef.current?.pageFlip().flip(nr)
     }
@@ -219,7 +326,7 @@ return (
   <div className="absolute right-0 top-0 flex flex-col items-end pointer-events-none">
     <div className="absolute top-[120px] pr-[0.6rem] bookmark-right bookmark-1 pointer-events-auto" onClick={() => geheZuSeite(0)}>Inhalt 🧾</div>
     <div className="absolute top-[210px] pr-[0.6rem] bookmark-right bookmark-2 pointer-events-auto" onClick={() => geheZuSeite(letzteChronikSeite)}>Chronik 📚</div>
-    <div className="absolute top-[300px] pr-[0.6rem] bookmark-right bookmark-3 pointer-events-auto" onClick={() => window.location.href = '/nscs.html'}>NSCs 🧙</div>
+    <div className="absolute top-[300px] pr-[0.6rem] bookmark-right bookmark-3 pointer-events-auto" onClick={() => geheZuSeite(ersteNSCSeite)}>NSCs 🧙</div>
     <div className="absolute top-[390px] pr-[0.6rem] bookmark-right bookmark-4 pointer-events-auto" onClick={() => geheZuSeite(letzteSeite)}>Timeline ⏳</div>
   </div>
 )}
@@ -229,7 +336,7 @@ return (
   <div className="absolute left-0 top-0 flex flex-col items-start pointer-events-none">
     <div className="absolute top-[120px] pl-[0.6rem] bookmark bookmark-1 pointer-events-auto" onClick={() => geheZuSeite(0)}>🧾 Inhalt</div>
     <div className="absolute top-[210px] pl-[0.6rem] bookmark bookmark-2 pointer-events-auto" onClick={() => geheZuSeite(letzteChronikSeite)}>📚 Chronik</div>
-    <div className="absolute top-[300px] pl-[0.6rem] bookmark bookmark-3 pointer-events-auto" onClick={() => window.location.href = '/nscs.html'}>🧙 NSCs</div>
+    <div className="absolute top-[300px] pl-[0.6rem] bookmark bookmark-3 pointer-events-auto" onClick={() => geheZuSeite(ersteNSCSeite)}>🧙 NSCs</div>
     <div className="absolute top-[390px] pl-[0.6rem] bookmark bookmark-4 pointer-events-auto" onClick={() => geheZuSeite(letzteSeite)}>⏳ Timeline</div>
   </div>
 )}
@@ -242,7 +349,7 @@ return (
       <div className="absolute top-[210px] pl-[0.6rem] bookmark bookmark-2 pointer-events-auto" onClick={() => geheZuSeite(letzteChronikSeite)}>📚 Chronik</div>
     </div>
     <div className="absolute right-0 top-0 flex flex-col items-end pointer-events-none">
-      <div className="absolute top-[300px] pr-[0.6rem] bookmark-right bookmark-3 pointer-events-auto" onClick={() => window.location.href = '/nscs.html'}>NSCs 🧙</div>
+      <div className="absolute top-[300px] pr-[0.6rem] bookmark-right bookmark-3 pointer-events-auto" onClick={() => geheZuSeite(ersteNSCSeite)}>NSCs 🧙</div>
       <div className="absolute top-[390px] pr-[0.6rem] bookmark-right bookmark-4 pointer-events-auto" onClick={() => geheZuSeite(letzteSeite)}>Timeline ⏳</div>
     </div>
   </>
@@ -287,6 +394,26 @@ return (
         seitenMap={seitenIndexMap}
         goToPage={(n) => bookRef.current?.pageFlip().flip(n)}
       />
+    ) : entry?.id === 'timeline' ? (
+      <TimelinePage
+        entries={entries}
+        seitenMap={seitenIndexMap}
+        goToPage={geheZuSeite}
+      />
+    ) : entry?.typ === 'nsc' ? (
+      <NSCPage
+        nscs={entry.gruppe}
+        onEdit={(nsc) => {
+          setSelectedNSC(nsc)
+          setEntryType('nsc')
+          setShowPopup(true)
+        }}
+        onDelete={async (id) => {
+          if (!confirm('NSC wirklich löschen?')) return
+          const { error } = await supabase.from('nscs').delete().eq('id', id)
+          if (!error) fetchNSCs()
+        }}
+      />
     ) : (
       <ChronikPage
         entry={entry}
@@ -318,7 +445,7 @@ return (
     <div className="mt-4 flex justify-between items-center px-8">
       <button onClick={goPrev} className="magical-btn">⬅ Zurück</button>
       <button
-        onClick={() => setShowPopup(true)}
+        onClick={() => openNewEntryPopup()}
         className="magical-btn bg-green-900 hover:bg-green-800"
       >
         ✨ Neuer Eintrag ✨
@@ -356,6 +483,18 @@ return (
           images={images}
           setImages={setImages}
           resetForm={resetForm}
+          entryType={entryType}
+          setEntryType={setEntryType}
+          selectedNSC={selectedNSC}
+          setSelectedNSC={setSelectedNSC}
+          name={name}
+          setName={setName}
+          rolle={rolle}
+          setRolle={setRolle}
+          info={info}
+          setInfo={setInfo}
+          handleNSCSubmit={handleNSCSubmit}
+          editNSCId={editNSCId}
         />
   </>
 )
