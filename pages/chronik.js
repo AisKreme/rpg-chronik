@@ -25,6 +25,7 @@ export default function Chronik() {
   const [showPopup, setShowPopup] = useState(false)
   const [suchbegriff, setSuchbegriff] = useState('')
   const bookRef = useRef(null)
+  const [aktiveSeite, setAktiveSeite] = useState(0)
 
   // 🔍 Gefilterte Einträge (Suche)
   const gefilterteEintraege = entries.filter(entry => {
@@ -32,14 +33,8 @@ export default function Chronik() {
     return text.toLowerCase().includes(suchbegriff.toLowerCase())
   })
 
-  // 📄 Seitenaufbau vorbereiten (Inhaltsverzeichnis = Seite 0)
-  const seitenIndexMap = new Map()
-  let pageCounter = 1 // Seite 0 ist Inhaltsverzeichnis
+  
 
-  gefilterteEintraege.forEach((entry) => {
-    seitenIndexMap.set(entry.id, pageCounter)
-    pageCounter++
-  })
 
   useEffect(() => {
     fetchEntries()
@@ -152,11 +147,40 @@ function handleEdit(entry) {
     )
   }
 
-  // Seiten vorbereiten
-  const pages = [...entries]
-  const needsPadding = pages.length % 2 === 0
-  pages.push(null) // Eingabeformular auf neuer Seite
-  if (!needsPadding) pages.push(null) // auf rechter Seite enden
+  // 📖 Seitenaufbau vorbereiten – inklusive Inhaltsverzeichnis und Timeline
+  const pages = []
+
+  // ➤ Seite 0: Inhaltsverzeichnis (rechte Einzelseite)
+  pages.push({ id: 'inhalt', note: '📖 Inhaltsverzeichnis', flow: '', ort: '', kapitel: '', tags: [] })
+
+  // ➤ Hauptseiten: Chronik-Einträge
+  pages.push(...gefilterteEintraege)
+
+  // ➤ ggf. Leerseite einfügen, damit Timeline auf linker Seite erscheint
+  const totalWithoutTimeline = pages.length
+  const needsEmptyPageBeforeTimeline = totalWithoutTimeline % 2 === 0
+  if (needsEmptyPageBeforeTimeline) pages.push(null)
+
+  // ➤ Letzte Seite: Timeline (linke Einzelseite / Rückseite)
+  pages.push({ id: 'timeline', note: '📅 Timeline', flow: '', ort: '', kapitel: '', tags: [] })
+
+
+  //Bookmarks + Helper
+      const letzteSeite = pages.length - 1 // Timeline ist letzte Seite
+      const letzteChronikSeite = pages.findIndex(p => p?.id === entries.at(-1)?.id)
+
+      // ➤ Jetzt Mapping aufbauen
+      const seitenIndexMap = new Map()
+      let pageCounter = 1
+      pages.forEach((entry, i) => {
+        if (entry && entry.id && entry.id !== 'inhalt' && entry.id !== 'timeline') {
+          seitenIndexMap.set(entry.id, pageCounter)
+        }
+        pageCounter++
+      })
+    function geheZuSeite(nr) {
+      bookRef.current?.pageFlip().flip(nr)
+    }
 
   function goNext() {
     if (bookRef.current) {
@@ -189,17 +213,40 @@ return (
   <>
       <div className="flex justify-center items-center min-h-screen bg-[#1c1b18]">
   <div className="relative w-[900px] bg-[#1c1b18] border border-yellow-700 rounded-lg p-4 shadow-xl">
-        {/* 📖 Linke Bookmarks */}
-          <div className="absolute left-0 top-[20%] flex flex-col gap-6">
-            <div className="bookmark bookmark-1" onClick={() => console.log('Inhalt')}>Inhalt</div>
-            <div className="bookmark bookmark-2" onClick={() => console.log('Chronik')}>Chronik</div>
-          </div>
+          {/* 📖 Linke oder Rechte Bookmarks je nach Seite */}
+            {/* 🔖 Inhaltsseite: Alle rechts */}
+{aktiveSeite === 0 && (
+  <div className="absolute right-0 top-0 flex flex-col items-end pointer-events-none">
+    <div className="absolute top-[120px] pr-[0.6rem] bookmark-right bookmark-1 pointer-events-auto" onClick={() => geheZuSeite(0)}>Inhalt 🧾</div>
+    <div className="absolute top-[210px] pr-[0.6rem] bookmark-right bookmark-2 pointer-events-auto" onClick={() => geheZuSeite(letzteChronikSeite)}>Chronik 📚</div>
+    <div className="absolute top-[300px] pr-[0.6rem] bookmark-right bookmark-3 pointer-events-auto" onClick={() => window.location.href = '/nscs.html'}>NSCs 🧙</div>
+    <div className="absolute top-[390px] pr-[0.6rem] bookmark-right bookmark-4 pointer-events-auto" onClick={() => geheZuSeite(letzteSeite)}>Timeline ⏳</div>
+  </div>
+)}
 
-          {/* 📖 Rechte Bookmarks */}
-          <div className="absolute right-0 top-[50%] flex flex-col gap-6 items-end">
-            <div className="bookmark-right bookmark-3" onClick={() => window.location.href = '/nscs.html'}>🧙 NSCs</div>
-            <div className="bookmark-right bookmark-4" onClick={() => console.log('Timeline')}>Timeline</div>
-          </div> 
+{/* 🔖 Timeline-Seite: Alle links */}
+{aktiveSeite === letzteSeite && (
+  <div className="absolute left-0 top-0 flex flex-col items-start pointer-events-none">
+    <div className="absolute top-[120px] pl-[0.6rem] bookmark bookmark-1 pointer-events-auto" onClick={() => geheZuSeite(0)}>🧾 Inhalt</div>
+    <div className="absolute top-[210px] pl-[0.6rem] bookmark bookmark-2 pointer-events-auto" onClick={() => geheZuSeite(letzteChronikSeite)}>📚 Chronik</div>
+    <div className="absolute top-[300px] pl-[0.6rem] bookmark bookmark-3 pointer-events-auto" onClick={() => window.location.href = '/nscs.html'}>🧙 NSCs</div>
+    <div className="absolute top-[390px] pl-[0.6rem] bookmark bookmark-4 pointer-events-auto" onClick={() => geheZuSeite(letzteSeite)}>⏳ Timeline</div>
+  </div>
+)}
+
+{/* 🔖 Alle anderen Seiten (Chronik) → 2 links, 2 rechts */}
+{aktiveSeite !== 0 && aktiveSeite !== letzteSeite && (
+  <>
+    <div className="absolute left-0 top-0 flex flex-col items-start pointer-events-none">
+      <div className="absolute top-[120px] pl-[0.6rem] bookmark bookmark-1 pointer-events-auto" onClick={() => geheZuSeite(0)}>🧾 Inhalt</div>
+      <div className="absolute top-[210px] pl-[0.6rem] bookmark bookmark-2 pointer-events-auto" onClick={() => geheZuSeite(letzteChronikSeite)}>📚 Chronik</div>
+    </div>
+    <div className="absolute right-0 top-0 flex flex-col items-end pointer-events-none">
+      <div className="absolute top-[300px] pr-[0.6rem] bookmark-right bookmark-3 pointer-events-auto" onClick={() => window.location.href = '/nscs.html'}>NSCs 🧙</div>
+      <div className="absolute top-[390px] pr-[0.6rem] bookmark-right bookmark-4 pointer-events-auto" onClick={() => geheZuSeite(letzteSeite)}>Timeline ⏳</div>
+    </div>
+  </>
+)}
 
 
         {/* 🔍 Suchleiste über dem Buch */}
@@ -229,42 +276,42 @@ return (
       useMouseEvents={false}
       mobileScrollSupport={true}
       className="flipbook"
+      onFlip={(e) => setAktiveSeite(e.data)}
     >
-    <div>
-      {/* Inhaltsverzeichnis-Seite */}
-       <Inhaltsverzeichnis
+
+    {pages.map((entry, idx) => (
+  <div key={idx} className="pointer-events-auto">
+    {entry?.id === 'inhalt' ? (
+      <Inhaltsverzeichnis
         entries={gefilterteEintraege}
         seitenMap={seitenIndexMap}
         goToPage={(n) => bookRef.current?.pageFlip().flip(n)}
-
       />
-    </div>
-    
-      {gefilterteEintraege.map((entry, idx) => (
-        <div key={idx} className="pointer-events-auto">
-          <ChronikPage
-            entry={entry}
-            idx={idx}
-            visibleFlowIds={visibleFlowIds}
-            toggleFlow={toggleFlow}
-            handleEdit={handleEdit}
-            handleDelete={handleDelete}
-            handleSubmit={handleSubmit}
-            note={note}
-            setNote={setNote}
-            flow={flow}
-            setFlow={setFlow}
-            kapitel={kapitel}
-            setKapitel={setKapitel}
-            ort={ort}
-            setOrt={setOrt}
-            tags={tags}
-            setTags={setTags}
-            editId={editId}
-            resetForm={resetForm}
-          />
-        </div>
-      ))}
+    ) : (
+      <ChronikPage
+        entry={entry}
+        idx={idx}
+        visibleFlowIds={visibleFlowIds}
+        toggleFlow={toggleFlow}
+        handleEdit={handleEdit}
+        handleDelete={handleDelete}
+        handleSubmit={handleSubmit}
+        note={note}
+        setNote={setNote}
+        flow={flow}
+        setFlow={setFlow}
+        kapitel={kapitel}
+        setKapitel={setKapitel}
+        ort={ort}
+        setOrt={setOrt}
+        tags={tags}
+        setTags={setTags}
+        editId={editId}
+        resetForm={resetForm}
+      />
+    )}
+  </div>
+))}
     </HTMLFlipBook>
 
     {/* 🔘 Navigationsleiste Unten*/}

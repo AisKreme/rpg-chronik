@@ -121,28 +121,24 @@ body {
 
 /* 🔖 Linke Bookmarks */
 .bookmark {
-  @apply justify-start pl-4;
+display: flex;
+  justify-content: flex-start;
   border-top-left-radius: 9999px;
   border-bottom-left-radius: 9999px;
-  background: linear-gradient(to left, #facc15, #b45309);
 }
-.bookmark:nth-child(2) {
-  background: linear-gradient(to left, #4ade80, #15803d);
-}
+
 .bookmark:hover {
   transform: translateZ(-10px) translateX(-60px);
 }
 
 /* 🔖 Rechte Bookmarks */
 .bookmark-right {
-  @apply justify-end pr-4;
+  display: flex;
+  justify-content: flex-end;
   border-top-right-radius: 9999px;
   border-bottom-right-radius: 9999px;
-  background: linear-gradient(to right, #60a5fa, #1e3a8a);
 }
-.bookmark-right:nth-child(2) {
-  background: linear-gradient(to right, #f472b6, #9d174d);
-}
+
 .bookmark-right:hover {
   transform: translateZ(-10px) translateX(60px);
 }
