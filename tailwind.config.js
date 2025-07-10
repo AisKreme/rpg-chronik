@@ -7,6 +7,7 @@ module.exports = {
     extend: {
       fontFamily: {
         serif: ['"EB Garamond"', 'serif'],
+        sans: ['Inter', 'sans-serif'],
       },
       colors: {
         parchment: '#fdf6e3',
