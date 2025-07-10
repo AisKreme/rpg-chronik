@@ -2,7 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  overflow: hidden;
+}
 /* 🌌 Hintergrund */
 body {
   background-color: #12100e;
@@ -41,26 +46,28 @@ body {
   box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
   padding: 1rem;
   position: relative;
-  overflow: hidden;
+  box-sizing: border-box;
+  /* verhindert horizontales Scrollen */
+  overflow-x: hidden;
+  /* erlaubt vertikales Scrollen nur bei Bedarf */
+  overflow-y: auto;
 }
 
 /* ✨ Seite leuchtet magisch */
 .page::before {
   content: '';
   position: absolute;
-  inset: -6px;
-  border: 1px dashed rgba(255, 215, 0, 0.2);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   border-radius: 0.5rem;
   pointer-events: none;
-  animation: glowPage 6s infinite ease-in-out;
 }
-@keyframes glowPage {
-  0%, 100% {
-    box-shadow: 0 0 5px rgba(212, 175, 55, 0.1);
-  }
-  50% {
-    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
-  }
+
+.page * {
+  margin-bottom: 0.25rem;
+  box-sizing: border-box;
 }
 
 /* ✨ Magische Hauptbuttons */
@@ -105,12 +112,43 @@ body {
   box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
 }
 
-/* 🔮 Navbar */
-.navbar {
-  background: linear-gradient(to right, #1a1a1a, #2c2c2c);
-  color: #f6ecd3;
-  font-family: 'Cinzel', serif;
-  border-bottom: 2px solid #d4af37;
-  padding: 0.75rem 1.5rem;
-  box-shadow: 0 4px 10px rgba(212, 175, 55, 0.15);
+.bookmark,
+.bookmark-right {
+  @apply w-36 h-14 text-sm sm:text-base text-white font-bold flex items-center cursor-pointer shadow-md transition-all duration-300;
+  transform: translateZ(-10px);
+  z-index: 0;
 }
+
+/* 🔖 Linke Bookmarks */
+.bookmark {
+  @apply justify-start pl-4;
+  border-top-left-radius: 9999px;
+  border-bottom-left-radius: 9999px;
+  background: linear-gradient(to left, #facc15, #b45309);
+}
+.bookmark:nth-child(2) {
+  background: linear-gradient(to left, #4ade80, #15803d);
+}
+.bookmark:hover {
+  transform: translateZ(-10px) translateX(-60px);
+}
+
+/* 🔖 Rechte Bookmarks */
+.bookmark-right {
+  @apply justify-end pr-4;
+  border-top-right-radius: 9999px;
+  border-bottom-right-radius: 9999px;
+  background: linear-gradient(to right, #60a5fa, #1e3a8a);
+}
+.bookmark-right:nth-child(2) {
+  background: linear-gradient(to right, #f472b6, #9d174d);
+}
+.bookmark-right:hover {
+  transform: translateZ(-10px) translateX(60px);
+}
+
+/* 🔖 Farbvarianten */
+.bookmark-1 { background: linear-gradient(to left, #facc15, #b45309); } /* Gelb/Orange */
+.bookmark-2 { background: linear-gradient(to left, #4ade80, #15803d); } /* Grün */
+.bookmark-3 { background: linear-gradient(to right, #60a5fa, #1e3a8a); } /* Blau */
+.bookmark-4 { background: linear-gradient(to right, #f472b6, #9d174d); } /* Pink/Violett */

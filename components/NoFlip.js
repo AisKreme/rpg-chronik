@@ -1,11 +1,12 @@
-// components/NoFlipWrapper.js
-export default function NoFlipWrapper({ children, active }) {
+// components/NoFlip.js
+export default function NoFlip({ children }) {
   return (
     <div
-      onMouseDown={active ? (e) => e.stopPropagation() : undefined}
-      onTouchStart={active ? (e) => e.stopPropagation() : undefined}
-      onClick={active ? (e) => e.stopPropagation() : undefined}
-      style={{ width: '100%', height: '100%' }}
+      onMouseDown={(e) => e.stopPropagation()}
+      onTouchStart={(e) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
+      className="w-full"
     >
       {children}
     </div>
