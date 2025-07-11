@@ -1,8 +1,6 @@
-
 import { motion, AnimatePresence } from 'framer-motion'
 import ChronikPage from './ChronikPage'
 import React, { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabaseClient'
 import ImageUploader from './ImageUploader'
 
 export default function EntryPopup({
@@ -40,11 +38,9 @@ export default function EntryPopup({
   setInfo,
   handleNSCSubmit,
   editNSCId,
-  resetNSCForm,
+  scrollToEntry,
 }) {
-
-  // Beim Bearbeiten: vorhandene Bilder aus Eintrag übernehmen
-
+  // NSC-Daten vorbereiten beim Bearbeiten
   useEffect(() => {
     if (entryType === 'nsc' && selectedNSC) {
       setName(selectedNSC.name || '')
@@ -53,6 +49,19 @@ export default function EntryPopup({
       setImages(selectedNSC.images || [])
     }
   }, [entryType, selectedNSC])
+
+
+  // Eintrag speichern je nach Typ
+  const handleSave = async (e) => {
+    e?.preventDefault()
+    let newId = null
+    if (entryType === 'chronik') {
+      newId = await handleSubmit()
+    } else if (entryType === 'nsc') {
+      newId = await handleNSCSubmit()
+    }
+    resetForm(newId)
+  }
 
   return (
     <AnimatePresence>
@@ -71,7 +80,10 @@ export default function EntryPopup({
             transition={{ type: 'spring', stiffness: 200, damping: 20 }}
           >
             <button
-              onClick={onClose}
+              onClick={() => {
+                resetForm()
+                onClose()
+            }}
               className="absolute top-2 right-2 text-yellow-400 hover:text-yellow-200 text-lg font-bold bg-transparent"
               title="Schließen"
             >
@@ -86,7 +98,7 @@ export default function EntryPopup({
               <button
                 type="button"
                 onClick={() => setEntryType('chronik')}
-                className={`px-3 py-1 rounded \${entryType === 'chronik'
+                className={`px-3 py-1 rounded ${entryType === 'chronik'
                   ? 'bg-yellow-700 text-parchment'
                   : 'bg-[#3a362e] text-yellow-300 hover:bg-[#4a453c]'}`}
               >
@@ -95,7 +107,7 @@ export default function EntryPopup({
               <button
                 type="button"
                 onClick={() => setEntryType('nsc')}
-                className={`px-3 py-1 rounded \${entryType === 'nsc'
+                className={`px-3 py-1 rounded ${entryType === 'nsc'
                   ? 'bg-yellow-700 text-parchment'
                   : 'bg-[#3a362e] text-yellow-300 hover:bg-[#4a453c]'}`}
               >
@@ -111,10 +123,7 @@ export default function EntryPopup({
                 toggleFlow={toggleFlow}
                 handleEdit={handleEdit}
                 handleDelete={handleDelete}
-                handleSubmit={(e) => {
-                  handleSubmit(e)
-                  onClose()
-                }}
+                handleSubmit={handleSave}
                 note={note}
                 setNote={setNote}
                 flow={flow}
@@ -128,19 +137,10 @@ export default function EntryPopup({
                 editId={editId}
                 images={images}
                 setImages={setImages}
-                resetForm={() => {
-                  resetForm()
-                  onClose()
-                }}
+                resetForm={resetForm}
               />
             ) : (
-              <form
-                onSubmit={(e) => {
-                  handleNSCSubmit(e)
-                  onClose()
-                }}
-                className="space-y-3"
-              >
+              <form onSubmit={handleSave} className="space-y-3">
                 <input
                   type="text"
                   placeholder="Name"
@@ -162,11 +162,11 @@ export default function EntryPopup({
                   className="w-full p-2 rounded border border-yellow-700 text-black"
                 />
                 <ImageUploader
-                    entryId={editNSCId ? editNSCId.toString() : 'temp'}
-                    bucket="npcs"
-                    initialImages={images}
-                    onUploadComplete={(newImages) => setImages(newImages)}
-                    />
+                  entryId={editNSCId ? editNSCId.toString() : 'temp'}
+                  bucket="npcs"
+                  initialImages={images}
+                  onUploadComplete={(newImages) => setImages(newImages)}
+                />
                 <button className="magical-btn bg-green-900 hover:bg-green-800 w-full">
                   {editNSCId ? '💾 NSC aktualisieren' : '➕ NSC speichern'}
                 </button>

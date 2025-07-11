@@ -30,7 +30,7 @@ const ChronikPage = React.forwardRef(function ChronikPage(
     setImages,
   },
   ref
-) {
+) { 
   const [selectedImage, setSelectedImage] = useState(null)
 
   return (

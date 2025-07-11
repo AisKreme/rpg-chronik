@@ -60,13 +60,6 @@ const handleNSCSubmit = async () => {
   console.log('🧪 [handleNSCSubmit STARTED]');
   console.log('📝 Eingabedaten:', { editNSCId, name, rolle, info, images });
 
-  // 🔍 Check: Supabase-Client-Struktur
-  console.log('🔍 Supabase URL:', supabase?.rest?.url);
-  console.log('🔍 Prozess-Umgebungsvariablen:', {
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-  });
-
   // 🔁 Bestehenden NSC aktualisieren
   if (editNSCId) {
     console.log('✏️ Versuche Update für ID:', editNSCId);
@@ -74,6 +67,7 @@ const handleNSCSubmit = async () => {
       .from('nscs')
       .update({ name, rolle, info, images })
       .eq('id', editNSCId);
+      
 
     if (error) {
       console.error('❌ Fehler beim Aktualisieren:', error.message);
@@ -107,7 +101,7 @@ const handleNSCSubmit = async () => {
 
   // 📦 Bilder verschieben aus temp in npcs/<newId>
   console.log('📂 Verschiebe Bilder nach Ordner npcs/' + newId);
-  // const movedImages = await moveImagesToFinalFolder(images, newId, 'npcs');
+  const movedImages = await moveImagesToFinalFolder(images, newId, 'npcs');
   console.log('📦 Neue Bildpfade:', movedImages);
 
   // 🔄 Bilder im NSC-Eintrag nachträglich speichern
@@ -123,6 +117,8 @@ const handleNSCSubmit = async () => {
   }
 
   console.log('✅ Bilder aktualisiert für NSC-ID:', newId);
+  if (fetchNSCs) await fetchNSCs()
+  if (scrollToEntry) scrollToEntry(newId)
 
   // 🧹 Formular zurücksetzen
   setEditNSCId(null);
@@ -130,8 +126,6 @@ const handleNSCSubmit = async () => {
   resetForm();
   console.log('🎉 Vorgang abgeschlossen – NSC gespeichert');
 };
-
-
 
   useEffect(() => {
     fetchEntries()
@@ -146,15 +140,35 @@ const handleNSCSubmit = async () => {
     if (!error) setEntries(data)
   }
 
-  function resetForm() {
-    setNote('')
-    setFlow('')
-    setKapitel('')
-    setOrt('')
-    setTags('')
-    setEditId(null)
-    fetchEntries()
+function resetForm(newId = null) {
+  // Chronik-Felder
+  setNote('')
+  setFlow('')
+  setKapitel('')
+  setOrt('')
+  setTags('')
+  setEditId(null)
+
+  // NSC-Felder
+  setName('')
+  setRolle('')
+  setInfo('')
+  setEditNSCId?.(null)
+  setSelectedNSC(null)
+
+  // Allgemeines
+  setImages([])
+  setEntryType('chronik')
+
+  // Optionales Scrollen
+  if (newId) {
+    scrollToEntry?.(newId)
   }
+
+  // Nachladen
+  fetchEntries?.()
+  fetchNSCs?.()
+}
 
 
 function handleEdit(entry) {
@@ -332,6 +346,14 @@ function openNewEntryPopup(type = 'chronik') {
             seitenIndexMap.set(entry.id, i)
           }
         })
+    const scrollToEntry = (id) => {
+  const index = entries.findIndex((e) => e.id === id)
+  if (index === -1) return
+  const page = index % 2 === 0 ? index : index - 1
+  setTimeout(() => {
+    bookRef.current?.pageFlip().flip(page)
+  }, 200)
+}
     function geheZuSeite(nr) {
       bookRef.current?.pageFlip().flip(nr)
     }
@@ -512,8 +534,6 @@ return (
           show={showPopup}
           onClose={() => {
             setShowPopup(false)
-            resetForm()
-            setImages([])
           }}
           handleSubmit={handleSubmit}
           note={note}
@@ -547,6 +567,7 @@ return (
           editNSCId={editNSCId}
           images={images}
           setImages={setImages}
+          scrollToEntry={scrollToEntry}
         />
   </>
 )
