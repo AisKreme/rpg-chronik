@@ -146,5 +146,7 @@ display: flex;
 /* 🔖 Farbvarianten */
 .bookmark-1 { background: linear-gradient(to left, #facc15, #b45309); } /* Gelb/Orange */
 .bookmark-2 { background: linear-gradient(to left, #4ade80, #15803d); } /* Grün */
-.bookmark-3 { background: linear-gradient(to right, #60a5fa, #1e3a8a); } /* Blau */
+.bookmark-3 { background: linear-gradient(to left, #60a5fa, #1e3a8a); } /* Blau */
 .bookmark-4 { background: linear-gradient(to right, #f472b6, #9d174d); } /* Pink/Violett */
+.bookmark-5 { background: linear-gradient(to right, #a78bfa, #6d28d9); } /* Lila/Violett */
+.bookmark-6 { background: linear-gradient(to right, #f87171, #b91c1c); } /* Rot/Dunkelrot */

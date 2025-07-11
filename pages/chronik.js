@@ -323,7 +323,7 @@ function openNewEntryPopup(type = 'chronik') {
         }
 
         // ➤ Spielercharaktere: genau 4 Stück, je 1 pro Seite (2 Doppelseiten)
-        const spielerCharaktere = sortierteNSCs.slice(0, 4)
+        const spielerCharaktere = sortierteNSCs.slice(0, 6)
         const ersteSCSeite = pages.length
         pages.push(...spielerCharaktere.map((nsc, index) => ({
           eintrag: nsc,
@@ -332,7 +332,7 @@ function openNewEntryPopup(type = 'chronik') {
         })))
 
         // ➤ NSCs (restliche): je 2 pro Seite
-        const restlicheNSCs = sortierteNSCs.slice(4)
+        const restlicheNSCs = sortierteNSCs.slice(6)
         const nscGroups = []
         for (let i = 0; i < restlicheNSCs.length; i += 2) {
           nscGroups.push(restlicheNSCs.slice(i, i + 2))
@@ -344,6 +344,12 @@ function openNewEntryPopup(type = 'chronik') {
           typ: 'nsc',
           gruppe
         })))
+
+        // ➤ Neue Map-Seiten vorbereiten (Platzhalter-Beispiel, 3 Seiten)
+        const ersteMapSeite = pages.length
+        pages.push({ id: 'map-1', typ: 'map', note: '🗺 Karte 1' })
+        pages.push({ id: 'map-2', typ: 'map', note: '🗺 Karte 2' })
+        pages.push({ id: 'map-3', typ: 'map', note: '🗺 Karte 3' })
 
         // ➤ Ggf. Leerseite einfügen, damit Timeline auf linker Seite erscheint
         const totalWithoutTimeline = pages.length
@@ -364,18 +370,19 @@ function openNewEntryPopup(type = 'chronik') {
             seitenIndexMap.set(entry.id, i)
           }
         })
-    const scrollToEntry = (id) => {
-  const index = entries.findIndex((e) => e.id === id)
-  if (index === -1) return
-  const page = index % 2 === 0 ? index : index - 1
-  setTimeout(() => {
-    bookRef.current?.pageFlip().flip(page)
-  }, 200)
-}
+
     function geheZuSeite(nr) {
       bookRef.current?.pageFlip().flip(nr)
     }
 
+      const scrollToEntry = (id) => {
+        const index = entries.findIndex((e) => e.id === id)
+        if (index === -1) return
+        const page = index % 2 === 0 ? index : index - 1
+        setTimeout(() => {
+          bookRef.current?.pageFlip().flip(page)
+        }, 200)
+      }
   function goNext() {
     if (bookRef.current) {
       bookRef.current.pageFlip().flipNext()
@@ -412,9 +419,11 @@ return (
 {aktiveSeite === 0 && (
   <div className="absolute right-0 top-0 flex flex-col items-end pointer-events-none">
     <div className="absolute top-[120px] pr-[0.6rem] bookmark-right bookmark-1 pointer-events-auto" onClick={() => geheZuSeite(0)}>Inhalt 🧾</div>
-    <div className="absolute top-[210px] pr-[0.6rem] bookmark-right bookmark-2 pointer-events-auto" onClick={() => geheZuSeite(letzteChronikSeite)}>Chronik 📚</div>
-    <div className="absolute top-[300px] pr-[0.6rem] bookmark-right bookmark-3 pointer-events-auto" onClick={() => geheZuSeite(ersteNSCSeite)}>NSCs 🧙</div>
-    <div className="absolute top-[390px] pr-[0.6rem] bookmark-right bookmark-4 pointer-events-auto" onClick={() => geheZuSeite(letzteSeite)}>Timeline ⏳</div>
+    <div className="absolute top-[200px] pr-[0.6rem] bookmark-right bookmark-2 pointer-events-auto" onClick={() => geheZuSeite(letzteChronikSeite)}>Chronik 📚</div>
+    <div className="absolute top-[280px] pr-[0.6rem] bookmark-right bookmark-3 pointer-events-auto" onClick={() => geheZuSeite(ersteSCSeite)}>SCs 🧙</div>
+    <div className="absolute top-[360px] pr-[0.6rem] bookmark-right bookmark-4 pointer-events-auto" onClick={() => geheZuSeite(ersteNSCSeite)}>NSCs 🧝</div>
+    <div className="absolute top-[440px] pr-[0.6rem] bookmark-right bookmark-5 pointer-events-auto" onClick={() => geheZuSeite(ersteMapSeite)}>Maps 🗺</div>
+    <div className="absolute top-[520px] pr-[0.6rem] bookmark-right bookmark-6 pointer-events-auto" onClick={() => geheZuSeite(letzteSeite)}>Timeline ⏳</div>
   </div>
 )}
 
@@ -422,9 +431,11 @@ return (
 {aktiveSeite === letzteSeite && (
   <div className="absolute left-0 top-0 flex flex-col items-start pointer-events-none">
     <div className="absolute top-[120px] pl-[0.6rem] bookmark bookmark-1 pointer-events-auto" onClick={() => geheZuSeite(0)}>🧾 Inhalt</div>
-    <div className="absolute top-[210px] pl-[0.6rem] bookmark bookmark-2 pointer-events-auto" onClick={() => geheZuSeite(letzteChronikSeite)}>📚 Chronik</div>
-    <div className="absolute top-[300px] pl-[0.6rem] bookmark bookmark-3 pointer-events-auto" onClick={() => geheZuSeite(ersteNSCSeite)}>🧙 NSCs</div>
-    <div className="absolute top-[390px] pl-[0.6rem] bookmark bookmark-4 pointer-events-auto" onClick={() => geheZuSeite(letzteSeite)}>⏳ Timeline</div>
+    <div className="absolute top-[200px] pl-[0.6rem] bookmark bookmark-2 pointer-events-auto" onClick={() => geheZuSeite(letzteChronikSeite)}>📚 Chronik</div>
+    <div className="absolute top-[280px] pl-[0.6rem] bookmark bookmark-3 pointer-events-auto" onClick={() => geheZuSeite(ersteSCSeite)}>🧙 SCs</div>
+    <div className="absolute top-[360px] pl-[0.6rem] bookmark bookmark-4 pointer-events-auto" onClick={() => geheZuSeite(ersteNSCSeite)}>🧙 NSCs</div>
+    <div className="absolute top-[440px] pl-[0.6rem] bookmark bookmark-5 pointer-events-auto" onClick={() => geheZuSeite(ersteMapSeite)}>🗺 Maps</div>
+    <div className="absolute top-[520px] pl-[0.6rem] bookmark bookmark-6 pointer-events-auto" onClick={() => geheZuSeite(letzteSeite)}>⏳ Timeline</div>
   </div>
 )}
 
@@ -433,26 +444,28 @@ return (
   <>
     <div className="absolute left-0 top-0 flex flex-col items-start pointer-events-none">
       <div className="absolute top-[120px] pl-[0.6rem] bookmark bookmark-1 pointer-events-auto" onClick={() => geheZuSeite(0)}>🧾 Inhalt</div>
-      <div className="absolute top-[210px] pl-[0.6rem] bookmark bookmark-2 pointer-events-auto" onClick={() => geheZuSeite(letzteChronikSeite)}>📚 Chronik</div>
+      <div className="absolute top-[200px] pl-[0.6rem] bookmark bookmark-2 pointer-events-auto" onClick={() => geheZuSeite(letzteChronikSeite)}>📚 Chronik</div>
+      <div className="absolute top-[280px] pl-[0.6rem] bookmark bookmark-3 pointer-events-auto" onClick={() => geheZuSeite(ersteSCSeite)}>🧙 SCs</div>
     </div>
     <div className="absolute right-0 top-0 flex flex-col items-end pointer-events-none">
-      <div className="absolute top-[300px] pr-[0.6rem] bookmark-right bookmark-3 pointer-events-auto" onClick={() => geheZuSeite(ersteNSCSeite)}>NSCs 🧙</div>
-      <div className="absolute top-[390px] pr-[0.6rem] bookmark-right bookmark-4 pointer-events-auto" onClick={() => geheZuSeite(letzteSeite)}>Timeline ⏳</div>
+      <div className="absolute top-[360px] pr-[0.6rem] bookmark-right bookmark-4 pointer-events-auto" onClick={() => geheZuSeite(ersteNSCSeite)}>NSCs 🧙</div>
+      <div className="absolute top-[440px] pr-[0.6rem] bookmark-right bookmark-5 pointer-events-auto" onClick={() => geheZuSeite(ersteMapSeite)}>Maps 🗺</div>
+      <div className="absolute top-[520px] pr-[0.6rem] bookmark-right bookmark-6 pointer-events-auto" onClick={() => geheZuSeite(letzteSeite)}>Timeline ⏳</div>
     </div>
   </>
 )}
 
 
-        {/* 🔍 Suchleiste über dem Buch */}
-        <div className="flex justify-center mb-4">
-          <input
-            type="text"
-            placeholder="🔍 Suche nach Schlagwort, Ort, Kapitel ..."
-            value={suchbegriff}
-            onChange={(e) => setSuchbegriff(e.target.value)}
-            className="w-[60%] px-4 py-2 rounded border border-yellow-700 text-black shadow"
-          />
-        </div>
+      {/* 🔍 Suchleiste über dem Buch */}
+      <div className="flex justify-center mb-6">
+        <input
+          type="text"
+          placeholder="🔍 Suche nach Schlagwort, Ort, Kapitel ..."
+          value={suchbegriff}
+          onChange={(e) => setSuchbegriff(e.target.value)}
+          className="w-[60%] px-4 py-2 rounded-lg border border-yellow-700 bg-[#2d2a24] text-yellow-300/80 placeholder-yellow-500/30 shadow-lg shadow-yellow-900/30 focus:outline-none focus:ring-2 focus:ring-yellow-600 transition duration-300 font-serif"
+        />
+      </div>
 
 
     {/* 📖 FlipBook */}
