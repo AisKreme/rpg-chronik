@@ -90,30 +90,33 @@ export default function EntryPopup({
               ✕
             </button>
 
-            <h2 className="text-xl font-bold mb-4">
-              {editId || editNSCId ? '✏️ Bearbeiten' : '🖋 Neuer Eintrag'}
-            </h2>
+                            <h2 className="text-xl font-bold mb-4">
+                    {editId || editNSCId ? '✏️ Bearbeiten' : '🖋 Neuer Eintrag'}
+                    </h2>
 
-            <div className="mb-4 flex gap-2">
-              <button
-                type="button"
-                onClick={() => setEntryType('chronik')}
-                className={`px-3 py-1 rounded ${entryType === 'chronik'
-                  ? 'bg-yellow-700 text-parchment'
-                  : 'bg-[#3a362e] text-yellow-300 hover:bg-[#4a453c]'}`}
-              >
-                📖 Chronik
-              </button>
-              <button
-                type="button"
-                onClick={() => setEntryType('nsc')}
-                className={`px-3 py-1 rounded ${entryType === 'nsc'
-                  ? 'bg-yellow-700 text-parchment'
-                  : 'bg-[#3a362e] text-yellow-300 hover:bg-[#4a453c]'}`}
-              >
-                🧙 NSC
-              </button>
-            </div>
+{/* Umschalt-Buttons nur anzeigen, wenn NICHT im Bearbeiten-Modus */}
+                        {!editId && !editNSCId && (
+                        <div className="mb-4 flex gap-2">
+                            <button
+                            type="button"
+                            onClick={() => setEntryType('chronik')}
+                            className={`px-3 py-1 rounded ${entryType === 'chronik'
+                                ? 'bg-yellow-700 text-parchment'
+                                : 'bg-[#3a362e] text-yellow-300 hover:bg-[#4a453c]'}`}
+                            >
+                            📖 Chronik
+                            </button>
+                            <button
+                            type="button"
+                            onClick={() => setEntryType('nsc')}
+                            className={`px-3 py-1 rounded ${entryType === 'nsc'
+                                ? 'bg-yellow-700 text-parchment'
+                                : 'bg-[#3a362e] text-yellow-300 hover:bg-[#4a453c]'}`}
+                            >
+                            🧙 NSC
+                            </button>
+                        </div>
+                        )}
 
             {entryType === 'chronik' ? (
               <ChronikPage
@@ -162,12 +165,14 @@ export default function EntryPopup({
                   onChange={(e) => setInfo(e.target.value)}
                   className="w-full p-2 rounded border border-yellow-700 text-black"
                 />
-                <ImageUploader
-                  entryId={editNSCId ? editNSCId.toString() : 'temp'}
-                  bucket="npcs"
-                  initialImages={images}
-                  onUploadComplete={(newImages) => setImages(newImages)}
-                />
+           {editNSCId && (
+            <ImageUploader
+                entryId={editNSCId.toString()}
+                bucket="npcs"
+                initialImages={images}
+                onUploadComplete={(newImages) => setImages(newImages)}
+                  />
+                    )}
                 <button className="magical-btn bg-green-900 hover:bg-green-800 w-full"
                 onClick={() => {
                 resetForm()
