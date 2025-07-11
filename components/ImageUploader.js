@@ -47,8 +47,11 @@ export default function ImageUploader({
   const handleDelete = async (url) => {
     if (!confirm('Bild wirklich löschen?')) return
 
-    const imagePath = url.split('/').slice(-3).join('/')
-    const { error } = await supabase.storage.from(bucket).remove([imagePath])
+    // ❗ Nur Dateiname extrahieren
+    const imagePath = url.split('/').slice(-1)[0]
+    const filePath = `${entryId}/${imagePath}`
+
+    const { error } = await supabase.storage.from(bucket).remove([filePath])
 
     if (error) {
       alert('Fehler beim Löschen: ' + error.message)
@@ -61,62 +64,61 @@ export default function ImageUploader({
   }
 
   return (
-  <div className="mb-4">
-    <label className="text-sm text-yellow-300 mb-1 block">📸 Bilder:</label>
+    <div className="mb-4">
+      <label className="text-sm text-yellow-300 mb-1 block">📸 Bilder:</label>
 
-    {Array.isArray(localImages) && localImages.length > 0 && (
-      <div className="flex flex-wrap gap-2 mb-2">
-        {localImages.map((url, i) => (
-          <div key={i} className="relative">
-            <img
-              src={url}
-              className="h-20 w-20 object-cover rounded shadow cursor-pointer"
-              onClick={() => setPreviewUrl(url)}
-            />
-            <button
-              type="button"
-              onClick={() => handleDelete(url)}
-              className="absolute top-0 right-0 text-red-500 bg-black/70 rounded-full px-1"
-              title="Löschen"
-            >
-              ❌
-            </button>
-          </div>
-        ))}
-      </div>
-    )}
+      {Array.isArray(localImages) && localImages.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-2">
+          {localImages.map((url, i) => (
+            <div key={i} className="relative">
+              <img
+                src={url}
+                className="h-20 w-20 object-cover rounded shadow cursor-pointer"
+                onClick={() => setPreviewUrl(url)}
+              />
+              <button
+                type="button"
+                onClick={() => handleDelete(url)}
+                className="absolute top-0 right-0 text-red-500 bg-black/70 rounded-full px-1"
+                title="Löschen"
+              >
+                ❌
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
-    {showUploader && (
-      <input
-        type="file"
-        accept="image/*"
-        multiple
-        onChange={handleFileChange}
-        className="text-sm text-yellow-200 mt-2"
-      />
-    )}
+      {showUploader && (
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handleFileChange}
+          className="text-sm text-yellow-200 mt-2"
+        />
+      )}
 
-    <button
-      type="button"
-      onClick={() => setShowUploader(!showUploader)}
-      className="text-sm text-blue-700 underline mt-1"
-    >
-      {showUploader ? 'Hochladen schließen' : 'Foto hochladen'}
-    </button>
-
-    {uploading && (
-      <p className="text-sm text-gray-500 mt-1">Hochladen…</p>
-    )}
-
-    {previewUrl && (
-      <div
-        className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
-        onClick={() => setPreviewUrl(null)}
+      <button
+        type="button"
+        onClick={() => setShowUploader(!showUploader)}
+        className="text-sm text-blue-700 underline mt-1"
       >
-        <img src={previewUrl} alt="Vorschau" className="max-w-full max-h-full rounded" />
-      </div>
-    )}
-  </div>
+        {showUploader ? 'Hochladen schließen' : 'Foto hochladen'}
+      </button>
 
+      {uploading && (
+        <p className="text-sm text-gray-500 mt-1">Hochladen…</p>
+      )}
+
+      {previewUrl && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+          onClick={() => setPreviewUrl(null)}
+        >
+          <img src={previewUrl} alt="Vorschau" className="max-w-full max-h-full rounded" />
+        </div>
+      )}
+    </div>
   )
 }
