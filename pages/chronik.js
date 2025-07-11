@@ -7,7 +7,9 @@ import HTMLFlipBook from 'react-pageflip'
 import EntryPopup from '../components/EntryPopup'
 import Inhaltsverzeichnis from '../components/Inhaltsverzeichnis'
 import TimelinePage from '../components/TimelinePage'
-import NSCPage from './nscs'
+import NSCPage from '../components/NSCPage'
+import MapPage from '../components/MapPage'
+import LegendPage from '../components/LegendPage'
 
 
 export default function Chronik() {
@@ -236,6 +238,7 @@ function openNewEntryPopup(type = 'chronik') {
       ort,
       tags: tags.split(',').map((t) => t.trim()),
       date: heute,
+      images,
     }
 
     if (editId) {
@@ -345,11 +348,11 @@ function openNewEntryPopup(type = 'chronik') {
           gruppe
         })))
 
-        // ➤ Neue Map-Seiten vorbereiten (Platzhalter-Beispiel, 3 Seiten)
         const ersteMapSeite = pages.length
-        pages.push({ id: 'map-1', typ: 'map', note: '🗺 Karte 1' })
-        pages.push({ id: 'map-2', typ: 'map', note: '🗺 Karte 2' })
-        pages.push({ id: 'map-3', typ: 'map', note: '🗺 Karte 3' })
+      // ➤ Map-Doppelseite vorbereiten
+          pages.push( { typ: 'map-left', mapType: 'world' })
+           pages.push( { typ: 'map-legend', mapType: 'world' })
+       // pages.push({ id: 'map-3', typ: 'map', note: '🗺 Karte 3' })
 
         // ➤ Ggf. Leerseite einfügen, damit Timeline auf linker Seite erscheint
         const totalWithoutTimeline = pages.length
@@ -486,65 +489,85 @@ return (
       onFlip={(e) => setAktiveSeite(e.data)}
     >
 
-    {pages.map((entry, idx) => (
-  <div key={idx} className="pointer-events-auto">
-    {entry?.id === 'inhalt' ? (
-      <Inhaltsverzeichnis
-        entries={gefilterteEintraege}
-        seitenMap={seitenIndexMap}
-        goToPage={(n) => bookRef.current?.pageFlip().flip(n)}
-      />
-    ) : entry?.id === 'timeline' ? (
-      <TimelinePage
-        entries={entries}
-        seitenMap={seitenIndexMap}
-        goToPage={geheZuSeite}
-      />
-    ) : entry?.typ === 'nsc' || entry?.typ === 'sc' ? (
-      <NSCPage
-        eintrag={entry}
-        onEdit={(nsc) => {
-          setSelectedNSC(nsc)
-          setEditNSCId(nsc.id?.toString())
-          setName(nsc.name)
-          setRolle(nsc.rolle)
-          setInfo(nsc.info)
-          setImages(nsc.images || [])
-          setEntryType('nsc')
-          setShowPopup(true)
-        }}
-        onDelete={async (id) => {
-          if (!confirm('NSC wirklich löschen?')) return
-          const { error } = await supabase.from('nscs').delete().eq('id', id)
-          if (!error) fetchNSCs()
-        }}
-      />
-    ) : (
-      <ChronikPage
-        entry={entry}
-        idx={idx}
-        visibleFlowIds={visibleFlowIds}
-        toggleFlow={toggleFlow}
-        handleEdit={handleEdit}
-        handleDelete={handleDelete}
-        handleSubmit={handleSubmit}
-        note={note}
-        setNote={setNote}
-        flow={flow}
-        setFlow={setFlow}
-        kapitel={kapitel}
-        setKapitel={setKapitel}
-        ort={ort}
-        setOrt={setOrt}
-        tags={tags}
-        setTags={setTags}
-        editId={editId}
-        resetForm={resetForm}
-        onClose={() => setShowPopup(false)}
-      />
-    )}
-  </div>
-))}
+ {pages.map((entry, idx) => {
+
+
+      // if (entry.typ === 'map') {
+      //     return (
+      //       <>
+      //         <div key={`${idx}-karte`} className="page">
+      //           <MapPage mapId={entry.mapId} />
+      //         </div>
+      //         <div key={`${idx}-legende`} className="page">
+      //           <LegendPage mapId={entry.mapId} />
+      //         </div>
+      //       </>
+      //     )
+      //   }
+
+
+
+  return (
+    <div key={idx} className="pointer-events-auto">
+      { entry?.id === 'inhalt' ? (
+        
+        <Inhaltsverzeichnis
+          entries={gefilterteEintraege}
+          seitenMap={seitenIndexMap}
+          goToPage={(n) => bookRef.current?.pageFlip().flip(n)}
+        />
+      ) : entry?.id === 'timeline' ? (
+        <TimelinePage
+          entries={entries}
+          seitenMap={seitenIndexMap}
+          goToPage={geheZuSeite}
+        />
+      ) : entry?.typ === 'nsc' || entry?.typ === 'sc' ? (
+        <NSCPage
+          eintrag={entry}
+          onEdit={(nsc) => {
+            setSelectedNSC(nsc)
+            setEditNSCId(nsc.id?.toString())
+            setName(nsc.name)
+            setRolle(nsc.rolle)
+            setInfo(nsc.info)
+            setImages(nsc.images || [])
+            setEntryType('nsc')
+            setShowPopup(true)
+          }}
+          onDelete={async (id) => {
+            if (!confirm('NSC wirklich löschen?')) return
+            const { error } = await supabase.from('nscs').delete().eq('id', id)
+            if (!error) fetchNSCs()
+          }}
+        />
+      ) : (
+        <ChronikPage
+          entry={entry}
+          idx={idx}
+          visibleFlowIds={visibleFlowIds}
+          toggleFlow={toggleFlow}
+          handleEdit={handleEdit}
+          handleDelete={handleDelete}
+          handleSubmit={handleSubmit}
+          note={note}
+          setNote={setNote}
+          flow={flow}
+          setFlow={setFlow}
+          kapitel={kapitel}
+          setKapitel={setKapitel}
+          ort={ort}
+          setOrt={setOrt}
+          tags={tags}
+          setTags={setTags}
+          editId={editId}
+          resetForm={resetForm}
+          onClose={() => setShowPopup(false)}
+        />
+      )}
+    </div>
+  )
+})}
     </HTMLFlipBook>
 
     {/* 🔘 Navigationsleiste Unten*/}
@@ -601,6 +624,7 @@ return (
           setImages={setImages}
           scrollToEntry={scrollToEntry}
         />
+        
   </>
 )
 }
