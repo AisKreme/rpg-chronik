@@ -225,9 +225,9 @@ function openNewEntryPopup(type = 'chronik') {
     }
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    const heute = new Date().toLocaleDateString('de-DE')
+    const handleSubmit = async (e = null) => {
+      if (e) e.preventDefault()
+      const heute = new Date().toLocaleDateString('de-DE')
 
     const payload = {
       note,
@@ -301,46 +301,64 @@ function openNewEntryPopup(type = 'chronik') {
   return movedUrls
 }
 
-  // 📖 Seitenaufbau vorbereiten – inklusive Inhaltsverzeichnis und Timeline
-  const pages = []
+        // 📖 Seitenaufbau vorbereiten – inklusive Inhaltsverzeichnis und Timeline
+        const pages = []
 
-  // ➤ Seite 0: Inhaltsverzeichnis (rechte Einzelseite)
-  pages.push({ id: 'inhalt', note: '📖 Inhaltsverzeichnis', flow: '', ort: '', kapitel: '', tags: [] })
+        // ➤ Seite 0: Inhaltsverzeichnis (rechte Einzelseite)
+        pages.push({ id: 'inhalt', note: '📖 Inhaltsverzeichnis', flow: '', ort: '', kapitel: '', tags: [] })
 
-  // ➤ Hauptseiten: Chronik-Einträge
-    pages.push(...gefilterteEintraege.map(e => ({ ...e, typ: 'chronik' })))
+        // ➤ Hauptseiten: Chronik-Einträge
+        pages.push(...gefilterteEintraege.map(e => ({ ...e, typ: 'chronik' })))
 
-    // ➤ NSCs als Seiten danach
-    // ➤ NSCs in Gruppen zu je 2 verpacken
-      const nscGroups = []
-      for (let i = 0; i < nscs.length; i += 2) {
-        nscGroups.push(nscs.slice(i, i + 2))
-      }
+        /* --- SC/NSC-Bereich vorbereiten --- */
 
-      // ➤ Jede Gruppe wird eine Seite im Flipbook
-      pages.push(...nscGroups.map((gruppe, index) => ({
-        id: `nsc-page-${index}`,
-        typ: 'nsc',
-        gruppe
-      })))
+        // ➤ NSCs nach ID sortieren
+        const sortierteNSCs = [...nscs].sort((a, b) => a.id - b.id)
 
-    const ersteNSCSeite = pages.findIndex(p => p?.typ === 'nsc')
+        // ➤ Ggf. Leerseite einfügen, damit SCs auf rechter Seite starten
+        const indexVorErsterSCSeite = pages.length
+        const brauchtLeerseiteVorSCs = indexVorErsterSCSeite % 2 === 0
+        if (brauchtLeerseiteVorSCs) {
+          pages.push(null) // ❌ Leerseite, damit SCs rechts starten
+        }
 
-  // ➤ ggf. Leerseite einfügen, damit Timeline auf linker Seite erscheint
-  const totalWithoutTimeline = pages.length
-  const needsEmptyPageBeforeTimeline = totalWithoutTimeline % 2 === 0
-  if (needsEmptyPageBeforeTimeline) pages.push(null)
+        // ➤ Spielercharaktere: genau 4 Stück, je 1 pro Seite (2 Doppelseiten)
+        const spielerCharaktere = sortierteNSCs.slice(0, 4)
+        const ersteSCSeite = pages.length
+        pages.push(...spielerCharaktere.map((nsc, index) => ({
+          eintrag: nsc,
+          id: `sc-${index}`,
+          typ: 'sc'
+        })))
 
-  // ➤ Letzte Seite: Timeline (linke Einzelseite / Rückseite)
-  pages.push({ id: 'timeline', note: '📅 Timeline', flow: '', ort: '', kapitel: '', tags: [] })
+        // ➤ NSCs (restliche): je 2 pro Seite
+        const restlicheNSCs = sortierteNSCs.slice(4)
+        const nscGroups = []
+        for (let i = 0; i < restlicheNSCs.length; i += 2) {
+          nscGroups.push(restlicheNSCs.slice(i, i + 2))
+        }
 
+        const ersteNSCSeite = pages.length
+        pages.push(...nscGroups.map((gruppe, index) => ({
+          id: `nsc-page-${index}`,
+          typ: 'nsc',
+          gruppe
+        })))
 
-  //Bookmarks + Helper
-      const letzteSeite = pages.length - 1 // Timeline ist letzte Seite
-      const letzteChronikSeite = pages.findIndex(p => p?.id === entries.at(-1)?.id)
+        // ➤ Ggf. Leerseite einfügen, damit Timeline auf linker Seite erscheint
+        const totalWithoutTimeline = pages.length
+        const needsEmptyPageBeforeTimeline = totalWithoutTimeline % 2 === 0
+        if (needsEmptyPageBeforeTimeline) pages.push(null)
 
-      // ➤ Jetzt Mapping aufbauen
+        // ➤ Letzte Seite: Timeline (linke Einzelseite / Rückseite)
+        pages.push({ id: 'timeline', note: '📅 Timeline', flow: '', ort: '', kapitel: '', tags: [] })
+
+/* --- Bookmarks + Helper --- */
+
+        const letzteSeite = pages.length - 1 // Timeline ist letzte Seite
+        const letzteChronikSeite = pages.findIndex(p => p?.id === entries.at(-1)?.id)
         const seitenIndexMap = new Map()
+
         pages.forEach((entry, i) => {
           if (entry && entry.id && entry.id !== 'inhalt' && entry.id !== 'timeline') {
             seitenIndexMap.set(entry.id, i)
@@ -469,9 +487,9 @@ return (
         seitenMap={seitenIndexMap}
         goToPage={geheZuSeite}
       />
-    ) : entry?.typ === 'nsc' ? (
+    ) : entry?.typ === 'nsc' || entry?.typ === 'sc' ? (
       <NSCPage
-        nscs={entry.gruppe}
+        eintrag={entry}
         onEdit={(nsc) => {
           setSelectedNSC(nsc)
           setEditNSCId(nsc.id?.toString())
@@ -509,6 +527,7 @@ return (
         setTags={setTags}
         editId={editId}
         resetForm={resetForm}
+        onClose={() => setShowPopup(false)}
       />
     )}
   </div>

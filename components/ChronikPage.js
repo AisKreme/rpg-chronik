@@ -28,9 +28,10 @@ const ChronikPage = React.forwardRef(function ChronikPage(
     isForm,
     images,
     setImages,
+    onClose,
   },
   ref
-) { 
+) {
   const [selectedImage, setSelectedImage] = useState(null)
 
   return (
@@ -85,13 +86,21 @@ const ChronikPage = React.forwardRef(function ChronikPage(
                 />
                 
               <div className="flex gap-2 mt-2">
-                <button type="submit" className="bg-ink text-parchment px-4 py-1 rounded">
+                <button type="submit" className="bg-ink text-parchment px-4 py-1 rounded"
+                  onClick={() => {
+                    resetForm()
+                    onClose()
+                    }}
+                >
                   {editId ? 'Ändern' : 'Speichern'}
                 </button>
                 {editId && (
                   <button
                     type="button"
-                    onClick={resetForm}
+                    onClick={() => {
+                    resetForm()
+                    onClose()
+                    }}
                     className="border px-4 py-1 text-gray-700 rounded"
                   >
                     Abbrechen

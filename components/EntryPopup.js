@@ -56,7 +56,7 @@ export default function EntryPopup({
     e?.preventDefault()
     let newId = null
     if (entryType === 'chronik') {
-      newId = await handleSubmit()
+      newId = await handleSubmit(e)
     } else if (entryType === 'nsc') {
       newId = await handleNSCSubmit()
     }
@@ -138,6 +138,7 @@ export default function EntryPopup({
                 images={images}
                 setImages={setImages}
                 resetForm={resetForm}
+                onClose={onClose}
               />
             ) : (
               <form onSubmit={handleSave} className="space-y-3">
@@ -167,7 +168,11 @@ export default function EntryPopup({
                   initialImages={images}
                   onUploadComplete={(newImages) => setImages(newImages)}
                 />
-                <button className="magical-btn bg-green-900 hover:bg-green-800 w-full">
+                <button className="magical-btn bg-green-900 hover:bg-green-800 w-full"
+                onClick={() => {
+                resetForm()
+                onClose()
+              }}>
                   {editNSCId ? '💾 NSC aktualisieren' : '➕ NSC speichern'}
                 </button>
               </form>
