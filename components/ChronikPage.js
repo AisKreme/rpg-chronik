@@ -77,12 +77,13 @@ const ChronikPage = React.forwardRef(function ChronikPage(
                 className="w-full bg-[#2d2a24] text-[#f0e9d2] border border-[#5a4c2c] placeholder-[#c0b9a0] rounded-md px-3 py-2 shadow-inner focus:outline-none focus:ring-2 focus:ring-yellow-600 font-serif text-base"
               />
 
-              <ImageUploader
-                entryId={editId ? editId.toString() : 'temp'}
-                initialImages={images}
-                onUploadComplete={(newImages) => setImages(newImages)}
-              />
-
+                <ImageUploader
+                  entryId={editId ? editId.toString() : 'temp'}
+                  bucket="chronik-images"
+                  initialImages={images}
+                  onUploadComplete={(newImages) => setImages(newImages)}
+                />
+                
               <div className="flex gap-2 mt-2">
                 <button type="submit" className="bg-ink text-parchment px-4 py-1 rounded">
                   {editId ? 'Ändern' : 'Speichern'}

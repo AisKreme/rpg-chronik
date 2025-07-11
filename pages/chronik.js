@@ -1,7 +1,7 @@
 // pages/chronik.js
 
 import { useState, useEffect, useRef } from 'react'
-import { supabase } from '../lib/supabaseClient'
+import { supabase, supabaseUrl } from '../lib/supabaseClient'
 import ChronikPage from '../components/ChronikPage'
 import HTMLFlipBook from 'react-pageflip'
 import EntryPopup from '../components/EntryPopup'
@@ -17,7 +17,6 @@ export default function Chronik() {
   const [kapitel, setKapitel] = useState('')
   const [ort, setOrt] = useState('')
   const [tags, setTags] = useState('')
-  const [images, setImages] = useState([])
 
   // 📋 Allgemeine Zustände
   const [entries, setEntries] = useState([])
@@ -42,6 +41,7 @@ export default function Chronik() {
     const [rolle, setRolle] = useState('')
     const [info, setInfo] = useState('')
     const [editNSCId, setEditNSCId] = useState(null)
+    const [images, setImages] = useState([])
 
     useEffect(() => {
       fetchEntries()
@@ -51,71 +51,85 @@ export default function Chronik() {
     async function fetchNSCs() {
       const { data, error } = await supabase
         .from('nscs')
-        .select('*')
+        .select('id, name, rolle, info, images')
         .order('created_at', { ascending: true })
       if (!error) setNSCs(data)
     }
 
-      async function handleNSCSubmit(e) {
-        e.preventDefault()
+const handleNSCSubmit = async () => {
+  console.log('🧪 [handleNSCSubmit STARTED]');
+  console.log('📝 Eingabedaten:', { editNSCId, name, rolle, info, images });
 
-        if (!name) return alert('Name fehlt.')
+  // 🔍 Check: Supabase-Client-Struktur
+  console.log('🔍 Supabase URL:', supabase?.rest?.url);
+  console.log('🔍 Prozess-Umgebungsvariablen:', {
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  });
 
-        // 🆕 Neuen NSC speichern (ohne Bilder erstmal)
-        const { data, error } = await supabase
-          .from('nscs')
-          .insert({
-            name,
-            rolle,
-            info,
-            images: [], // Platzhalter – wird gleich aktualisiert
-          })
-          .select()
-          .single()
+  // 🔁 Bestehenden NSC aktualisieren
+  if (editNSCId) {
+    console.log('✏️ Versuche Update für ID:', editNSCId);
+    const { error } = await supabase
+      .from('nscs')
+      .update({ name, rolle, info, images })
+      .eq('id', editNSCId);
 
-        if (error) {
-          alert('Fehler beim Speichern: ' + error.message)
-          return
-        }
+    if (error) {
+      console.error('❌ Fehler beim Aktualisieren:', error.message);
+      alert('Fehler beim Aktualisieren: ' + error.message);
+    } else {
+      console.log('✅ Update erfolgreich für NSC-ID:', editNSCId);
+      resetForm();
+    }
+    return;
+  }
 
-        const newId = data.id.toString()
+  // ➕ Neuer NSC wird erstellt
+  console.log('➕ Neuer NSC wird erstellt...');
+  const insertPayload = { name, rolle, info };
+  console.log('📦 Insert-Daten:', insertPayload);
 
-        // 📦 Bilder aus temp/ nach nscs/<neueId>/ verschieben
-        const newImageUrls = await Promise.all(
-          images.map(async (url) => {
-            const fileName = url.split('/').pop()
-            const fromPath = `temp/${fileName}`
-            const toPath = `nscs/${newId}/${fileName}`
-
-            const { error: moveError } = await supabase.storage
-              .from('chronik')
-              .move(fromPath, toPath)
-
-            if (moveError) {
-              console.warn('Fehler beim Verschieben:', moveError)
-              return url
-            }
-
-            const { data: publicData } = supabase.storage
-              .from('chronik')
-              .getPublicUrl(toPath)
-
-            return publicData.publicUrl
-          })
-        )
-
-  // 🔁 NSC-Eintrag aktualisieren mit echten Bildpfaden
-  await supabase
+  const { data, error } = await supabase
     .from('nscs')
-    .update({ images: newImageUrls })
-    .eq('id', newId)
+    .insert(insertPayload)
+    .select('id')
+    .single();
 
-  // 🧹 Felder zurücksetzen
-  setName('')
-  setRolle('')
-  setInfo('')
-  setImages([])
-}
+  if (error) {
+    console.error('❌ Fehler beim INSERT:', error.message);
+    alert('Fehler beim Erstellen: ' + error.message);
+    return;
+  }
+
+  console.log('✅ NSC erstellt mit ID:', data.id);
+  const newId = data.id.toString();
+
+  // 📦 Bilder verschieben aus temp in npcs/<newId>
+  console.log('📂 Verschiebe Bilder nach Ordner npcs/' + newId);
+  // const movedImages = await moveImagesToFinalFolder(images, newId, 'npcs');
+  console.log('📦 Neue Bildpfade:', movedImages);
+
+  // 🔄 Bilder im NSC-Eintrag nachträglich speichern
+  const { error: updateError } = await supabase
+    .from('nscs')
+    .update({ images: movedImages })
+    .eq('id', newId);
+
+  if (updateError) {
+    console.error('❌ Fehler beim Bild-Update:', updateError.message);
+    alert('Fehler beim Hinzufügen der Bilder: ' + updateError.message);
+    return;
+  }
+
+  console.log('✅ Bilder aktualisiert für NSC-ID:', newId);
+
+  // 🧹 Formular zurücksetzen
+  setEditNSCId(null);
+  setImages([]);
+  resetForm();
+  console.log('🎉 Vorgang abgeschlossen – NSC gespeichert');
+};
 
 
 
@@ -141,6 +155,7 @@ export default function Chronik() {
     setEditId(null)
     fetchEntries()
   }
+
 
 function handleEdit(entry) {
   setEditId(entry.id)
@@ -207,7 +222,6 @@ function openNewEntryPopup(type = 'chronik') {
       ort,
       tags: tags.split(',').map((t) => t.trim()),
       date: heute,
-      images: images
     }
 
     if (editId) {
@@ -227,6 +241,7 @@ function openNewEntryPopup(type = 'chronik') {
         .select('id')
         .single()
 
+        
       if (error) alert('Fehler: ' + error.message)
       else {
         resetForm()
@@ -239,6 +254,38 @@ function openNewEntryPopup(type = 'chronik') {
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     )
   }
+
+  async function moveImagesToFinalFolder(images, newId, bucket) {
+  const movedUrls = []
+
+  for (const url of images) {
+    if (!url.includes('/temp/')) {
+      movedUrls.push(url)
+      continue
+    }
+
+    const oldPath = url.split('/storage/v1/object/public/')[1]
+    const filename = oldPath.split('/').pop()
+    const newPath = `${newId}/${filename}`
+
+    const { error: copyError } = await supabase
+      .storage
+      .from(bucket)
+      .copy(oldPath, newPath)
+
+    if (copyError) {
+      console.error('Fehler beim Kopieren:', copyError)
+      continue
+    }
+
+    await supabase.storage.from(bucket).remove([oldPath])
+
+   const publicUrl = `${supabaseUrl}/storage/v1/object/public/${bucket}/${newPath}`
+    movedUrls.push(publicUrl)
+  }
+
+  return movedUrls
+}
 
   // 📖 Seitenaufbau vorbereiten – inklusive Inhaltsverzeichnis und Timeline
   const pages = []
@@ -405,6 +452,11 @@ return (
         nscs={entry.gruppe}
         onEdit={(nsc) => {
           setSelectedNSC(nsc)
+          setEditNSCId(nsc.id?.toString())
+          setName(nsc.name)
+          setRolle(nsc.rolle)
+          setInfo(nsc.info)
+          setImages(nsc.images || [])
           setEntryType('nsc')
           setShowPopup(true)
         }}
@@ -480,8 +532,6 @@ return (
           handleDelete={handleDelete}
           editId={editId}
           entries={entries}
-          images={images}
-          setImages={setImages}
           resetForm={resetForm}
           entryType={entryType}
           setEntryType={setEntryType}
@@ -495,6 +545,8 @@ return (
           setInfo={setInfo}
           handleNSCSubmit={handleNSCSubmit}
           editNSCId={editNSCId}
+          images={images}
+          setImages={setImages}
         />
   </>
 )
