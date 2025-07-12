@@ -495,7 +495,7 @@ return (
     <div className="absolute top-[120px] pr-[0.6rem] bookmark-right bookmark-1 pointer-events-auto" onClick={() => geheZuSeite(0)}>Inhalt 🧾</div>
     <div className="absolute top-[200px] pr-[0.6rem] bookmark-right bookmark-2 pointer-events-auto" onClick={() => geheZuSeite(letzteChronikSeite)}>Chronik 📚</div>
     <div className="absolute top-[280px] pr-[0.6rem] bookmark-right bookmark-3 pointer-events-auto" onClick={() => geheZuSeite(ersteSCSeite)}>SCs 🧙</div>
-    <div className="absolute top-[360px] pr-[0.6rem] bookmark-right bookmark-4 pointer-events-auto" onClick={() => geheZuSeite(ersteNSCSeite)}>NSCs 🧝</div>
+    <div className="absolute top-[360px] pr-[0.6rem] bookmark-right bookmark-4 pointer-events-auto" onClick={() => geheZuSeite(ersteNSCSeite)}>NSCs 🧌</div>
     <div className="absolute top-[440px] pr-[0.6rem] bookmark-right bookmark-5 pointer-events-auto" onClick={() => geheZuSeite(ersteMapSeite)}>Maps 🗺</div>
     <div className="absolute top-[520px] pr-[0.6rem] bookmark-right bookmark-6 pointer-events-auto" onClick={() => geheZuSeite(letzteSeite)}>Timeline ⏳</div>
   </div>
@@ -507,7 +507,7 @@ return (
     <div className="absolute top-[120px] pl-[0.6rem] bookmark bookmark-1 pointer-events-auto" onClick={() => geheZuSeite(0)}>🧾 Inhalt</div>
     <div className="absolute top-[200px] pl-[0.6rem] bookmark bookmark-2 pointer-events-auto" onClick={() => geheZuSeite(letzteChronikSeite)}>📚 Chronik</div>
     <div className="absolute top-[280px] pl-[0.6rem] bookmark bookmark-3 pointer-events-auto" onClick={() => geheZuSeite(ersteSCSeite)}>🧙 SCs</div>
-    <div className="absolute top-[360px] pl-[0.6rem] bookmark bookmark-4 pointer-events-auto" onClick={() => geheZuSeite(ersteNSCSeite)}>🧙 NSCs</div>
+    <div className="absolute top-[360px] pl-[0.6rem] bookmark bookmark-4 pointer-events-auto" onClick={() => geheZuSeite(ersteNSCSeite)}>🧌 NSCs</div>
     <div className="absolute top-[440px] pl-[0.6rem] bookmark bookmark-5 pointer-events-auto" onClick={() => geheZuSeite(ersteMapSeite)}>🗺 Maps</div>
     <div className="absolute top-[520px] pl-[0.6rem] bookmark bookmark-6 pointer-events-auto" onClick={() => geheZuSeite(letzteSeite)}>⏳ Timeline</div>
   </div>
@@ -522,7 +522,7 @@ return (
       <div className="absolute top-[280px] pl-[0.6rem] bookmark bookmark-3 pointer-events-auto" onClick={() => geheZuSeite(ersteSCSeite)}>🧙 SCs</div>
     </div>
     <div className="absolute right-0 top-0 flex flex-col items-end pointer-events-none">
-      <div className="absolute top-[360px] pr-[0.6rem] bookmark-right bookmark-4 pointer-events-auto" onClick={() => geheZuSeite(ersteNSCSeite)}>NSCs 🧙</div>
+      <div className="absolute top-[360px] pr-[0.6rem] bookmark-right bookmark-4 pointer-events-auto" onClick={() => geheZuSeite(ersteNSCSeite)}>NSCs 🧌</div>
       <div className="absolute top-[440px] pr-[0.6rem] bookmark-right bookmark-5 pointer-events-auto" onClick={() => geheZuSeite(ersteMapSeite)}>Maps 🗺</div>
       <div className="absolute top-[520px] pr-[0.6rem] bookmark-right bookmark-6 pointer-events-auto" onClick={() => geheZuSeite(letzteSeite)}>Timeline ⏳</div>
     </div>
