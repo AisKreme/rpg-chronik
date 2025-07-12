@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { updateImagesInDB } from '../lib/dbHelpers'
 
@@ -12,6 +12,15 @@ export default function ImageUploader({
   const [showUploader, setShowUploader] = useState(false)
   const [localImages, setLocalImages] = useState(initialImages)
   const [previewUrl, setPreviewUrl] = useState(null)
+
+
+useEffect(() => {
+  // Setze Bilder nur beim erstmaligen Mount oder Wechsel der entryId
+  if (entryId && entryId !== 'temp') {
+    setLocalImages(initialImages || [])
+  }
+}, [entryId])
+
 
   const handleFileChange = async (e) => {
     

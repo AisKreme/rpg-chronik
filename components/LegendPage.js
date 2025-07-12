@@ -61,10 +61,15 @@ export default function LegendPage({
         />
 
         <ImageUploader
+          key={entryId}
           entryId={editMapId ? editMapId.toString() : 'temp'}
           bucket="maps"
           initialImages={images}
-          onUploadComplete={(newImages) => setImages(newImages)}
+          onUploadComplete={(newImages) => {
+            // Verhindere doppelte Bilder
+            const combined = [...new Set([...images, ...newImages])]
+            setImages(combined)
+}}
         />
 
         <button

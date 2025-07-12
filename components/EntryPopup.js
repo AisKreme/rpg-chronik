@@ -347,10 +347,15 @@ function resetFormLocal(newId = null) {
 
               {/* 📸 Bild-Upload Chronik */}
               <ImageUploader
+                key={entryId}
                 entryId={resolvedEntryId}
                 bucket={selectedBucket}
                 initialImages={images}
-                onUploadComplete={(newImages) => setImages(newImages)}
+                onUploadComplete={(newImages) => {
+                // Verhindere doppelte Bilder
+                const combined = [...new Set([...images, ...newImages])]
+                setImages(combined)
+              }}
               />
 
 
@@ -396,10 +401,15 @@ function resetFormLocal(newId = null) {
 
               {/* 📸 Bild-Upload NSC */}
               <ImageUploader
+                key={entryId}
                 entryId={resolvedEntryId}
                 bucket={selectedBucket}
                 initialImages={images}
-                onUploadComplete={(newImages) => setImages(newImages)}
+                onUploadComplete={(newImages) => {
+                  // Verhindere doppelte Bilder
+                  const combined = [...new Set([...images, ...newImages])]
+                  setImages(combined)
+                }}
               />
 
               <div className="flex gap-2">
