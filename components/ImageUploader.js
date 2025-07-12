@@ -10,20 +10,18 @@ export default function ImageUploader({
 }) {
   const [uploading, setUploading] = useState(false)
   const [showUploader, setShowUploader] = useState(false)
-  const [localImages, setLocalImages] = useState(initialImages)
+  const [localImages, setLocalImages] = useState([])
   const [previewUrl, setPreviewUrl] = useState(null)
 
-
+  // 🌀 Bei entryId-Wechsel: Nur initialisieren, wenn sich die Bilder wirklich geändert haben
 useEffect(() => {
-  // Setze Bilder nur beim erstmaligen Mount oder Wechsel der entryId
-  if (entryId && entryId !== 'temp') {
-    setLocalImages(initialImages || [])
+  if (Array.isArray(initialImages)) {
+    setLocalImages(initialImages)
   }
-}, [entryId])
+}, [entryId, initialImages?.length])
 
-
+  // 📤 Bilder hochladen
   const handleFileChange = async (e) => {
-    
     const files = Array.from(e.target.files)
     if (!files.length) return
 
@@ -34,7 +32,6 @@ useEffect(() => {
       const fileExt = file.name.split('.').pop()
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
       const filePath = `temp/${fileName}`
-console.log('📸 Hochgeladen nach:', filePath)
       const { error: uploadError } = await supabase.storage.from(bucket).upload(filePath, file)
       if (uploadError) {
         alert('Fehler beim Hochladen: ' + uploadError.message)
@@ -45,37 +42,41 @@ console.log('📸 Hochgeladen nach:', filePath)
       if (data?.publicUrl) uploadedUrls.push(data.publicUrl)
     }
 
-    setUploading(false)
-    setShowUploader(false)
-
     const updated = [...new Set([...localImages, ...uploadedUrls])]
     setLocalImages(updated)
-    if (onUploadComplete) await onUploadComplete(updated)
 
+    // In DB speichern
+    if (entryId && entryId !== 'temp') {
+      await updateImagesInDB(entryId, updated, bucket)
+    }
+
+    if (onUploadComplete) await onUploadComplete(updated)
+    setUploading(false)
+    setShowUploader(false)
     e.target.value = ''
   }
 
-        const handleImageDelete = async (url) => {
-        if (!confirm('Bild wirklich löschen?')) return
+  // ❌ Bild löschen
+  const handleImageDelete = async (url) => {
+    if (!confirm('Bild wirklich löschen?')) return
 
-        const pathInStorage = url.split('/storage/v1/object/public/')[1]
-        const { error } = await supabase.storage.from(bucket).remove([pathInStorage])
+    const pathInStorage = url.split(`${bucket}/`)[1]
+    const { error } = await supabase.storage.from(bucket).remove([pathInStorage])
 
-        if (error) {
-          alert('Fehler beim Löschen: ' + error.message)
-          return
-        }
+    if (error) {
+      alert('Fehler beim Löschen: ' + error.message)
+      return
+    }
 
-        const updated = localImages.filter((img) => img !== url)
-        setLocalImages(updated)
+    const updated = localImages.filter((img) => img !== url)
+    setLocalImages(updated)
 
-        // ⬇️ 📌 Jetzt auch in der DB aktualisieren – aber nur wenn es eine echte ID gibt
-        if (entryId && entryId !== 'temp') {
-          await updateImagesInDB(entryId, updated, bucket)
-        }
+    if (entryId && entryId !== 'temp') {
+      await updateImagesInDB(entryId, updated, bucket)
+    }
 
-        if (onUploadComplete) await onUploadComplete(updated)
-      }
+    if (onUploadComplete) await onUploadComplete(updated)
+  }
 
   return (
     <div className="mb-4">

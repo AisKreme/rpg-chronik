@@ -184,7 +184,7 @@ const handleSave = async (e) => {
     if (!isEditModeChronik && !isEditModeNSC && newId) {
       scrollToEntry?.(newId)
     }
-
+    console.log('💾 Final gespeicherte Bilder:', images)
     await refreshEntries?.()
     if (!isEditMode) setInitialKapitel?.('')
     resetFormLocal()
@@ -347,15 +347,10 @@ function resetFormLocal(newId = null) {
 
               {/* 📸 Bild-Upload Chronik */}
               <ImageUploader
-                key={entryId}
                 entryId={resolvedEntryId}
                 bucket={selectedBucket}
                 initialImages={images}
-                onUploadComplete={(newImages) => {
-                // Verhindere doppelte Bilder
-                const combined = [...new Set([...images, ...newImages])]
-                setImages(combined)
-              }}
+                onUploadComplete={setImages}
               />
 
 
@@ -401,15 +396,10 @@ function resetFormLocal(newId = null) {
 
               {/* 📸 Bild-Upload NSC */}
               <ImageUploader
-                key={entryId}
                 entryId={resolvedEntryId}
                 bucket={selectedBucket}
                 initialImages={images}
-                onUploadComplete={(newImages) => {
-                  // Verhindere doppelte Bilder
-                  const combined = [...new Set([...images, ...newImages])]
-                  setImages(combined)
-                }}
+                onUploadComplete={setImages}
               />
 
               <div className="flex gap-2">

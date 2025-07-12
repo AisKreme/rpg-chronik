@@ -81,10 +81,9 @@ export default function KartenVerwaltung() {
 
           {/* Bild-Upload für die Karte */}
           <ImageUploader
-            key={entryId}
             bucket="maps"
             folder={`maps/${karte.id}`}
-            images={karte.images || []} // optional
+            initialImages={images}
             entryId={karte.id}
             entryType="map"
             onUpload={() => ladeKarten()}

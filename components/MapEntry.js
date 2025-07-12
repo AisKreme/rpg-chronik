@@ -49,7 +49,6 @@ export default function MapEntry({
             className="w-full px-3 py-2 bg-[#2d2a24] text-yellow-300 border border-yellow-600 rounded focus:outline-none"
           />
           <ImageUploader
-            key={entryId}
             entryId={map?.id?.toString() || 'temp'}
             bucket="maps"
             initialImages={images}

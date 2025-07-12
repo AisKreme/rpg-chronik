@@ -61,7 +61,6 @@ export default function LegendPage({
         />
 
         <ImageUploader
-          key={entryId}
           entryId={editMapId ? editMapId.toString() : 'temp'}
           bucket="maps"
           initialImages={images}

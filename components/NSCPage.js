@@ -1,57 +1,118 @@
-
+import React, { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export default function NSCPage({ eintrag, onNSCEdit, onNSCDelete }) {
-  // Spielercharakter
+  const [previewUrl, setPreviewUrl] = useState(null)
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('de-DE')
+  }
+
+  const ImagePreview = () => (
+    <AnimatePresence>
+      {previewUrl && (
+        <motion.div
+          className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setPreviewUrl(null)}
+        >
+          <motion.img
+            src={previewUrl}
+            className="max-w-[90%] max-h-[90%] border-4 border-yellow-700 rounded shadow-xl"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+          />
+          <button
+            className="absolute top-4 right-4 text-yellow-200 bg-black/70 px-2 rounded"
+            onClick={() => setPreviewUrl(null)}
+          >
+            ✕
+          </button>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+
+const sparkleHeader = (emoji, text, colorClass) => (
+  <h1 className="text-2xl font-bold mb-2 text-center relative font-serif flex items-center justify-center gap-2">
+    <span className={`${colorClass} text-3xl`}>{emoji}</span>
+    <span className={`relative inline-block ${colorClass}`}>
+      <span className="relative z-10 animate-holo-glow">{text}</span>
+      <span className="absolute inset-0 blur-sm animate-glimmer from-white/10 via-yellow-400/30 to-white/10" />
+    </span>
+  </h1>
+)
+
+  const ProfileImage = ({ url }) => (
+    <img
+      src={url}
+      onClick={() => setPreviewUrl(url)}
+      className="w-24 h-24 object-cover object-top rounded shadow border-2 border-yellow-700 transition-transform duration-300 transform hover:scale-105 hover:border-green-500"
+    />
+  )
+
   if (eintrag.typ === 'sc') {
     const char = eintrag.eintrag
     return (
-      <div className="relative w-[420px] h-[550px] border border-yellow-700 bg-[#2d2a24] text-parchment p-4 shadow-xl font-serif overflow-y-auto">
-        <h1 className="text-2xl font-bold mb-2 text-yellow-300 text-center">🧙 Spielercharaktere</h1>
-        {char ? (
-          <div className="relative border border-yellow-700 p-3 rounded bg-[#1f1d1a] shadow">
-            <button onClick={() => onNSCEdit(char)} className="absolute top-2 right-8 text-sm hover:scale-110">✏️</button>
-            <button onClick={() => onNSCDelete(char.id)} className="absolute top-2 right-2 text-sm hover:scale-110">🗑️</button>
-            <h3 className="text-lg font-bold text-yellow-300">{char.name}</h3>
-            <p className="italic text-yellow-500">{char.rolle}</p>
-            <p className="mt-1 text-sm">{char.info}</p>
-            {char.images?.length > 0 && (
-              <div className="mt-2 grid grid-cols-2 gap-1">
-                {char.images.map((url, i) => (
-                  <img key={i} src={url} className="w-full h-20 object-cover rounded" />
-                ))}
+      <div className="flex flex-col items-center">
+        <div className="relative w-[420px] h-[530px] overflow-y-auto border border-blue-800 bg-[#1a1e24] text-parchment p-4 shadow-xl font-serif">
+          {sparkleHeader('🧙', 'Spielercharakter', 'text-blue-900')}
+          {char ? (
+            <div className="relative border border-blue-700 p-3 rounded bg-[#0f1012] shadow">
+              <button onClick={() => onNSCEdit(char)} className="absolute top-2 right-8 text-sm hover:scale-110">✏️</button>
+              <button onClick={() => onNSCDelete(char.id)} className="absolute top-2 right-2 text-sm hover:scale-110">🗑️</button>
+              <div className="flex items-start gap-4 mb-2">
+                {char.images?.[0] && <ProfileImage url={char.images[0]} />}
+                <div>
+                  <h3 className="text-lg font-bold text-yellow-300">{char.name}</h3>
+                  <p className="italic text-yellow-500">{char.rolle}</p>
+                </div>
               </div>
-            )}
-          </div>
-        ) : (
-          <div className="text-center text-yellow-500 mt-20">❌ Kein Eintrag vorhanden.</div>
-        )}
-        <div className="absolute bottom-1 left-0 right-0 text-center text-xs text-yellow-600">Spielercharaktere</div>
+              <pre className="mt-2 text-sm whitespace-pre-wrap font-serif">{char.info}</pre>
+            </div>
+          ) : (
+            <div className="text-center text-yellow-500 mt-20">❌ Kein Eintrag vorhanden.</div>
+          )}
+        </div>
+        <div className="w-[420px] h-[20px] bg-[#1a1e24] text-center text-xs text-blue-600 font-serif">
+          Spielercharaktere
+        </div>
+        <ImagePreview />
       </div>
     )
   }
 
-  // NSC-Seite (2 pro Seite)
   if (eintrag.typ === 'nsc') {
     return (
-      <div className="relative w-[420px] h-[550px] border border-yellow-700 bg-[#2d2a24] text-parchment p-4 shadow-xl font-serif overflow-y-auto">
-        <h1 className="text-2xl font-bold mb-2 text-yellow-300 text-center">🧙 NSCs</h1>
-        {eintrag.gruppe.map((nsc) => (
-          <div key={nsc.id} className="relative border border-yellow-700 p-3 mb-4 rounded bg-[#1f1d1a] shadow">
-            <button onClick={() => onNSCEdit(nsc)} className="absolute top-2 right-8 text-sm hover:scale-110">✏️</button>
-            <button onClick={() => onNSCDelete(nsc.id)} className="absolute top-2 right-2 text-sm hover:scale-110">🗑️</button>
-            <h3 className="text-lg font-bold text-yellow-300">{nsc.name}</h3>
-            <p className="italic text-yellow-500">{nsc.rolle}</p>
-            <p className="mt-1 text-sm">{nsc.info}</p>
-            {nsc.images?.length > 0 && (
-              <div className="mt-2 grid grid-cols-2 gap-1">
-                {nsc.images.map((url, i) => (
-                  <img key={i} src={url} className="w-full h-16 object-cover rounded" />
-                ))}
+      <div className="flex flex-col items-center">
+        <div className="relative w-[420px] h-[530px] overflow-y-auto border border-green-800 bg-[#1a1e24] text-parchment p-4 shadow-xl font-serif">
+          {sparkleHeader('🧌', 'NSCs', 'text-green-900')}
+          {eintrag.gruppe.map((nsc) => (
+            <div key={nsc.id} className="relative border border-green-700 p-3 mb-4 rounded bg-[#111510] shadow">
+              <button onClick={() => onNSCEdit(nsc)} className="absolute top-2 right-8 text-sm hover:scale-110">✏️</button>
+              <button onClick={() => onNSCDelete(nsc.id)} className="absolute top-2 right-2 text-sm hover:scale-110">🗑️</button>
+              <div className="flex items-start gap-4 mb-2">
+                {nsc.images?.[0] && <ProfileImage url={nsc.images[0]} />}
+                <div>
+                  <h3 className="text-lg font-bold text-yellow-300">{nsc.name}</h3>
+                  <p className="italic text-yellow-500">{nsc.rolle}</p>
+                  {nsc.created_at && (
+                    <p className="text-xs text-gray-400">📅 Erstes Treffen: {formatDate(nsc.created_at)}</p>
+                  )}
+                </div>
               </div>
-            )}
-          </div>
-        ))}
-        <div className="absolute bottom-1 left-0 right-0 text-center text-xs text-yellow-600">NSCs</div>
+              <pre className="mt-2 text-sm whitespace-pre-wrap font-serif">{nsc.info}</pre>
+            </div>
+          ))}
+        </div>
+        <div className="w-[420px] h-[20px] bg-[#1a1e24] text-center text-xs text-green-600 font-serif">
+          NSCs
+        </div>
+        <ImagePreview />
       </div>
     )
   }
