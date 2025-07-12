@@ -10,24 +10,31 @@ import TimelinePage from '../components/TimelinePage'
 import NSCPage from '../components/NSCPage'
 import MapPage from '../components/MapPage'
 import LegendPage from '../components/LegendPage'
+import { deleteChronikEntry, deleteNSCEntry } from '../lib/deleteHelpers'
+
+
 
 
 export default function Chronik() {
-// 📋 State-Variablen für Eintragsdaten
-  const [note, setNote] = useState('')
-  const [flow, setFlow] = useState('')
-  const [kapitel, setKapitel] = useState('')
-  const [ort, setOrt] = useState('')
-  const [tags, setTags] = useState('')
+// // 📋 State-Variablen für Eintragsdaten
+//   const [note, setNote] = useState('')
+//   const [flow, setFlow] = useState('')
+//   const [kapitel, setKapitel] = useState('')
+//   const [ort, setOrt] = useState('')
+//   const [tags, setTags] = useState('')
 
   // 📋 Allgemeine Zustände
   const [entries, setEntries] = useState([])
   const [visibleFlowIds, setVisibleFlowIds] = useState([])
   const [editId, setEditId] = useState(null)
+  const [editNSCId, setEditNSCId] = useState(null)
   const [showPopup, setShowPopup] = useState(false)
   const [suchbegriff, setSuchbegriff] = useState('')
   const bookRef = useRef(null)
   const [aktiveSeite, setAktiveSeite] = useState(0)
+  const [initialKapitel, setInitialKapitel] = useState('')
+  const pageRefs = useRef({}) // z. B. { [entry.id]: HTMLElement }
+  const [images, setImages] = useState([])
 
   // 🔍 Gefilterte Einträge (Suche)
   const gefilterteEintraege = entries.filter(entry => {
@@ -39,100 +46,34 @@ export default function Chronik() {
     const [entryType, setEntryType] = useState('chronik') // Standard: Chronik-Eintrag
     const [selectedNSC, setSelectedNSC] = useState(null)
 
-    const [name, setName] = useState('')
-    const [rolle, setRolle] = useState('')
-    const [info, setInfo] = useState('')
-    const [editNSCId, setEditNSCId] = useState(null)
-    const [images, setImages] = useState([])
+    // const [name, setName] = useState('')
+    // const [rolle, setRolle] = useState('')
+    // const [info, setInfo] = useState('')
+    // const [images, setImages] = useState([])
 
     useEffect(() => {
       fetchEntries()
       fetchNSCs()
     }, [])
 
-    async function fetchNSCs() {
-      const { data, error } = await supabase
-        .from('nscs')
-        .select('id, name, rolle, info, images')
-        .order('created_at', { ascending: true })
-      if (!error) setNSCs(data)
-    }
 
-const handleNSCSubmit = async () => {
-  console.log('🧪 [handleNSCSubmit STARTED]');
-  console.log('📝 Eingabedaten:', { editNSCId, name, rolle, info, images });
+    useEffect(() => {
+      function handleKeyDown(e) {
+        const tag = document.activeElement.tagName.toLowerCase()
+        if (tag === 'input' || tag === 'textarea') return
 
-  // 🔁 Bestehenden NSC aktualisieren
-  if (editNSCId) {
-    console.log('✏️ Versuche Update für ID:', editNSCId);
-    const { error } = await supabase
-      .from('nscs')
-      .update({ name, rolle, info, images })
-      .eq('id', editNSCId);
-      
+        if (e.key === 'ArrowLeft') {
+          goPrev()
+        } else if (e.key === 'ArrowRight') {
+          goNext()
+        }
+      }
 
-    if (error) {
-      console.error('❌ Fehler beim Aktualisieren:', error.message);
-      alert('Fehler beim Aktualisieren: ' + error.message);
-    } else {
-      console.log('✅ Update erfolgreich für NSC-ID:', editNSCId);
-      resetForm();
-    }
-    return;
-  }
+  window.addEventListener('keydown', handleKeyDown)
+  return () => window.removeEventListener('keydown', handleKeyDown)
+}, [])
 
-  // ➕ Neuer NSC wird erstellt
-  console.log('➕ Neuer NSC wird erstellt...');
-  const insertPayload = { name, rolle, info };
-  console.log('📦 Insert-Daten:', insertPayload);
-
-  const { data, error } = await supabase
-    .from('nscs')
-    .insert(insertPayload)
-    .select('id')
-    .single();
-
-  if (error) {
-    console.error('❌ Fehler beim INSERT:', error.message);
-    alert('Fehler beim Erstellen: ' + error.message);
-    return;
-  }
-
-  console.log('✅ NSC erstellt mit ID:', data.id);
-  const newId = data.id.toString();
-
-  // 📦 Bilder verschieben aus temp in npcs/<newId>
-  console.log('📂 Verschiebe Bilder nach Ordner npcs/' + newId);
-  const movedImages = await moveImagesToFinalFolder(images, newId, 'npcs');
-  console.log('📦 Neue Bildpfade:', movedImages);
-
-  // 🔄 Bilder im NSC-Eintrag nachträglich speichern
-  const { error: updateError } = await supabase
-    .from('nscs')
-    .update({ images: movedImages })
-    .eq('id', newId);
-
-  if (updateError) {
-    console.error('❌ Fehler beim Bild-Update:', updateError.message);
-    alert('Fehler beim Hinzufügen der Bilder: ' + updateError.message);
-    return;
-  }
-
-  console.log('✅ Bilder aktualisiert für NSC-ID:', newId);
-  if (fetchNSCs) await fetchNSCs()
-  if (scrollToEntry) scrollToEntry(newId)
-
-  // 🧹 Formular zurücksetzen
-  setEditNSCId(null);
-  setImages([]);
-  resetForm();
-  console.log('🎉 Vorgang abgeschlossen – NSC gespeichert');
-};
-
-  useEffect(() => {
-    fetchEntries()
-  }, [])
-
+//NEU
   async function fetchEntries() {
     const { data, error } = await supabase
       .from('chronik_entries')
@@ -142,129 +83,260 @@ const handleNSCSubmit = async () => {
     if (!error) setEntries(data)
   }
 
-function resetForm(newId = null) {
-  // Chronik-Felder
-  setNote('')
-  setFlow('')
-  setKapitel('')
-  setOrt('')
-  setTags('')
-  setEditId(null)
+  //NEU
+  async function fetchNSCs() {
+  const { data, error } = await supabase
+    .from('nscs')
+    .select('*')
+    .order('id', { ascending: true })
 
-  // NSC-Felder
-  setName('')
-  setRolle('')
-  setInfo('')
-  setEditNSCId?.(null)
-  setSelectedNSC(null)
+  if (!error) setNSCs(data)
+}
+  
+  // Vielleicht LÖSCHE - Selbstversuch
+  // async function fetchNSCs() {
+  //     const { data, error } = await supabase
+  //       .from('nscs')
+  //       .select('id, name, rolle, info, images')
+  //       .order('created_at', { ascending: true })
+  //     if (!error) setNSCs(data)
+  //   }
 
-  // Allgemeines
-  setImages([])
-  setEntryType('chronik')
+    //LÖSCHEN
+    //     function onDeleteChronikEntry(id) {
+    //   if (!confirm('Eintrag wirklich löschen?')) return
+    //   deleteChronikEntry(id).then(() => fetchEntries())
+    // }
 
-  // Optionales Scrollen
-  if (newId) {
-    scrollToEntry?.(newId)
-  }
+    //NEU
+    function handleEditChronik(entry) {
+      setEditId(entry.id)
+      setEditNSCId(null) // sicherstellen, dass NSC nicht gesetzt ist
+      setEntryType('chronik')
+      setSelectedNSC(null)
+      setShowPopup(true)
+    }
 
-  // Nachladen
-  fetchEntries?.()
-  fetchNSCs?.()
+    //NEU
+  function handleEditNSC(nsc) {
+      setEditNSCId(nsc.id)
+      setEditId(null) // sicherstellen, dass Chronik nicht gesetzt ist
+      setEntryType('nsc')
+      setSelectedNSC(nsc)
+      setShowPopup(true)
+    }
+    
+
+
+//NEU
+const onDeleteChronikEntry = async (id) => {
+  await deleteChronikEntry(id)
+  await fetchEntries()
 }
 
 
-function handleEdit(entry) {
-  setEditId(entry.id)
-  setNote(entry.note || '')
-  setFlow(entry.flow || '')
-  setKapitel(entry.kapitel || '')
-  setOrt(entry.ort || '')
-  setTags(entry.tags?.join(', ') || '')
-  setShowPopup(true)
+  //NEU
+const handleDeleteNSC = async (id) => {
+  await deleteNSCEntry(id)
+  await fetchNSCs()
 }
 
+//LÖSCHEN
 
-function openNewEntryPopup(type = 'chronik') {
-  setEntryType(type)
-  if (type === 'chronik' && !editId) {
-    const letztesKapitel = entries[entries.length - 1]?.kapitel || ''
-    setKapitel(letztesKapitel)
-  }
-  setSelectedNSC(null)
-  setShowPopup(true)
-}
+// const handleNSCSubmit = async () => {
+//   console.log('🧪 [handleNSCSubmit STARTED]');
+//   console.log('📝 Eingabedaten:', { editNSCId, name, rolle, info, images });
+
+//   // 🔁 Bestehenden NSC aktualisieren
+//   if (editNSCId) {
+//     console.log('✏️ Versuche Update für ID:', editNSCId);
+//     const { error } = await supabase
+//       .from('nscs')
+//       .update({ name, rolle, info, images })
+//       .eq('id', editNSCId);
+      
+
+//     if (error) {
+//       console.error('❌ Fehler beim Aktualisieren:', error.message);
+//       alert('Fehler beim Aktualisieren: ' + error.message);
+//     } else {
+//       console.log('✅ Update erfolgreich für NSC-ID:', editNSCId);
+//       resetForm();
+//     }
+//     return;
+//   }
+
+//   // ➕ Neuer NSC wird erstellt
+//   console.log('➕ Neuer NSC wird erstellt...');
+//   const insertPayload = { name, rolle, info };
+//   console.log('📦 Insert-Daten:', insertPayload);
+
+//   const { data, error } = await supabase
+//     .from('nscs')
+//     .insert(insertPayload)
+//     .select('id')
+//     .single();
+
+//   if (error) {
+//     console.error('❌ Fehler beim INSERT:', error.message);
+//     alert('Fehler beim Erstellen: ' + error.message);
+//     return;
+//   }
+
+//   console.log('✅ NSC erstellt mit ID:', data.id);
+//   const newId = data.id.toString();
+
+//   // 📦 Bilder verschieben aus temp in npcs/<newId>
+//   console.log('📂 Verschiebe Bilder nach Ordner npcs/' + newId);
+//   const movedImages = await moveImagesToFinalFolder(images, newId, 'npcs');
+//   console.log('📦 Neue Bildpfade:', movedImages);
+
+//   // 🔄 Bilder im NSC-Eintrag nachträglich speichern
+//   const { error: updateError } = await supabase
+//     .from('nscs')
+//     .update({ images: movedImages })
+//     .eq('id', newId);
+
+//   if (updateError) {
+//     console.error('❌ Fehler beim Bild-Update:', updateError.message);
+//     alert('Fehler beim Hinzufügen der Bilder: ' + updateError.message);
+//     return;
+//   }
+
+//   console.log('✅ Bilder aktualisiert für NSC-ID:', newId);
+//   if (fetchNSCs) await fetchNSCs()
+//   if (scrollToEntry) scrollToEntry(newId)
+
+//   // 🧹 Formular zurücksetzen
+//   setEditNSCId(null);
+//   setImages([]);
+//   resetForm();
+//   console.log('🎉 Vorgang abgeschlossen – NSC gespeichert');
+// };
+
+ 
+
+//LÖSCHEN
+
+// function resetForm(newId = null) {
+//   // Chronik-Felder
+//   setNote('')
+//   setFlow('')
+//   setKapitel('')
+//   setOrt('')
+//   setTags('')
+//   setEditId(null)
+
+//   // NSC-Felder
+//   setName('')
+//   setRolle('')
+//   setInfo('')
+//   setEditNSCId?.(null)
+//   setSelectedNSC(null)
+
+//   // Allgemeines
+//   setImages([])
+//   setEntryType('chronik')
+
+//   // Optionales Scrollen
+//   if (newId) {
+//     scrollToEntry?.(newId)
+//   }
+
+//   // Nachladen
+//   fetchEntries?.()
+//   fetchNSCs?.()
+// }
 
 
-  async function handleDelete(id) {
-    if (!confirm('Eintrag wirklich löschen?')) return
+// function handleEdit(entry) {
+//   setEditId(entry.id)
+//   setEntryType('chronik')
+//   setImages(entry.images || [])
+//   setShowPopup(true)
+// }
 
-    const { data: entry } = await supabase
-      .from('chronik_entries')
-      .select('images')
-      .eq('id', id)
-      .single()
 
-    if (entry?.images?.length > 0) {
-      const filePaths = entry.images.map((url) =>
-        url.split('/storage/v1/object/public/')[1]
-      )
+    //NEU
+    function openNewEntryPopup(type = 'chronik') {
+      setEntryType(type)
+      setEditId(null)
+      setEditNSCId(null)
+      setSelectedNSC(null)
+      setEntryType(type)
 
-      const { error: storageError } = await supabase.storage
-        .from('chronik')
-        .remove(filePaths)
-
-      if (storageError) {
-        alert('Fehler beim Löschen der Bilder: ' + storageError.message)
-        return
+      let letztesKapitel = ''
+      if (type === 'chronik' && entries.length > 0) {
+        letztesKapitel = entries[entries.length - 1]?.kapitel || ''
       }
+
+      setShowPopup(true)
+      setInitialKapitel(letztesKapitel) // falls du initialKapitel verwendest
     }
 
-    const { error } = await supabase.from('chronik_entries').delete().eq('id', id)
-    if (error) {
-      alert('Fehler beim Löschen des Eintrags: ' + error.message)
-    } else {
-      fetchEntries()
-    }
-  }
-
-    const handleSubmit = async (e = null) => {
-      if (e) e.preventDefault()
-      const heute = new Date().toLocaleDateString('de-DE')
-
-    const payload = {
-      note,
-      flow,
-      kapitel,
-      ort,
-      tags: tags.split(',').map((t) => t.trim()),
-      date: heute,
-      images,
+    //NEU
+    async function fetchAllEintraege() {
+      await Promise.all([fetchEntries(), fetchNSCs()])
     }
 
-    if (editId) {
-      const { error } = await supabase
-        .from('chronik_entries')
-        .update(payload)
-        .eq('id', editId)
 
-      if (error) alert('Fehler beim Aktualisieren: ' + error.message)
-      else {
-        resetForm()
-      }
-    } else {
-      const { data, error } = await supabase
-        .from('chronik_entries')
-        .insert(payload)
-        .select('id')
-        .single()
+
+// LÖSCHEN
+// function openNewEntryPopup(type = 'chronik') {
+//   setEntryType(type)
+//   if (type === 'chronik' && !editId) {
+//     const letztesKapitel = entries[entries.length - 1]?.kapitel || ''
+//     setKapitel(letztesKapitel)
+//   }
+//   setSelectedNSC(null)
+//   setShowPopup(true)
+// }
+
+
+ 
+
+
+  // LÖSCHEN
+
+
+  //   const handleSubmit = async (e = null) => {
+  //     if (e) e.preventDefault()
+  //     const heute = new Date().toLocaleDateString('de-DE')
+
+  //   const payload = {
+  //     note,
+  //     flow,
+  //     kapitel,
+  //     ort,
+  //     tags: tags.split(',').map((t) => t.trim()),
+  //     date: heute,
+  //     images,
+  //   }
+
+  //   if (editId) {
+  //     const { error } = await supabase
+  //       .from('chronik_entries')
+  //       .update(payload)
+  //       .eq('id', editId)
+
+  //     if (error) alert('Fehler beim Aktualisieren: ' + error.message)
+  //     else {
+  //       resetForm()
+  //     }
+  //   } else {
+  //     const { data, error } = await supabase
+  //       .from('chronik_entries')
+  //       .insert(payload)
+  //       .select('id')
+  //       .single()
 
         
-      if (error) alert('Fehler: ' + error.message)
-      else {
-        resetForm()
-      }
-    }
-  }
+  //     if (error) alert('Fehler: ' + error.message)
+  //     else {
+  //       resetForm()
+  //     }
+  //   }
+  // }
 
   function toggleFlow(id) {
     setVisibleFlowIds((prev) =>
@@ -272,37 +344,39 @@ function openNewEntryPopup(type = 'chronik') {
     )
   }
 
-  async function moveImagesToFinalFolder(images, newId, bucket) {
-  const movedUrls = []
+//LÖSCHEN
 
-  for (const url of images) {
-    if (!url.includes('/temp/')) {
-      movedUrls.push(url)
-      continue
-    }
+ // async function moveImagesToFinalFolder(images, newId, bucket) {
+//   const movedUrls = []
 
-    const oldPath = url.split('/storage/v1/object/public/')[1]
-    const filename = oldPath.split('/').pop()
-    const newPath = `${newId}/${filename}`
+//   for (const url of images) {
+//     if (!url.includes('/temp/')) {
+//       movedUrls.push(url)
+//       continue
+//     }
 
-    const { error: copyError } = await supabase
-      .storage
-      .from(bucket)
-      .copy(oldPath, newPath)
+//     const oldPath = url.split('/storage/v1/object/public/')[1]
+//     const filename = oldPath.split('/').pop()
+//     const newPath = `${newId}/${filename}`
 
-    if (copyError) {
-      console.error('Fehler beim Kopieren:', copyError)
-      continue
-    }
+//     const { error: copyError } = await supabase
+//       .storage
+//       .from(bucket)
+//       .copy(oldPath, newPath)
 
-    await supabase.storage.from(bucket).remove([oldPath])
+//     if (copyError) {
+//       console.error('Fehler beim Kopieren:', copyError)
+//       continue
+//     }
 
-   const publicUrl = `${supabaseUrl}/storage/v1/object/public/${bucket}/${newPath}`
-    movedUrls.push(publicUrl)
-  }
+//     await supabase.storage.from(bucket).remove([oldPath])
 
-  return movedUrls
-}
+//    const publicUrl = `${supabaseUrl}/storage/v1/object/public/${bucket}/${newPath}`
+//     movedUrls.push(publicUrl)
+//   }
+
+//   return movedUrls
+// }
 
         // 📖 Seitenaufbau vorbereiten – inklusive Inhaltsverzeichnis und Timeline
         const pages = []
@@ -397,21 +471,18 @@ function openNewEntryPopup(type = 'chronik') {
       bookRef.current.pageFlip().flipPrev()
     }
   }
-  useEffect(() => {
-  function handleKeyDown(e) {
-    const tag = document.activeElement.tagName.toLowerCase()
-    if (tag === 'input' || tag === 'textarea') return
 
-    if (e.key === 'ArrowLeft') {
-      goPrev()
-    } else if (e.key === 'ArrowRight') {
-      goNext()
-    }
-  }
+//LÖSCHEN
+// const handleDeleteNSC = async (id) => {
+//   const confirmed = confirm('NSC wirklich löschen?')
+//   if (!confirmed) return
 
-  window.addEventListener('keydown', handleKeyDown)
-  return () => window.removeEventListener('keydown', handleKeyDown)
-}, [])
+//   await deleteAllImages(id, 'npcs')
+//   await supabase.from('nscs').delete().eq('id', id)
+//   fetchNSCs()
+//}
+
+
 
 return (
   <>
@@ -524,45 +595,27 @@ return (
         />
       ) : entry?.typ === 'nsc' || entry?.typ === 'sc' ? (
         <NSCPage
+          ref={(el) => el && entry?.id && (pageRefs.current[entry.id] = el)}
           eintrag={entry}
-          onEdit={(nsc) => {
-            setSelectedNSC(nsc)
-            setEditNSCId(nsc.id?.toString())
-            setName(nsc.name)
-            setRolle(nsc.rolle)
-            setInfo(nsc.info)
-            setImages(nsc.images || [])
-            setEntryType('nsc')
-            setShowPopup(true)
-          }}
-          onDelete={async (id) => {
-            if (!confirm('NSC wirklich löschen?')) return
-            const { error } = await supabase.from('nscs').delete().eq('id', id)
-            if (!error) fetchNSCs()
-          }}
+          onNSCDelete={handleDeleteNSC}
+          onNSCEdit={handleEditNSC}
+          //LÖSCHEN
+          // onDelete={async (id) => {
+          //   if (!confirm('NSC wirklich löschen?')) return
+          //   const { error } = await supabase.from('nscs').delete().eq('id', id)
+          //   if (!error) fetchNSCs()
+          // }}
+
         />
       ) : (
         <ChronikPage
+        ref={(el) => el && entry?.id && (pageRefs.current[entry.id] = el)}
           entry={entry}
           idx={idx}
           visibleFlowIds={visibleFlowIds}
           toggleFlow={toggleFlow}
-          handleEdit={handleEdit}
-          handleDelete={handleDelete}
-          handleSubmit={handleSubmit}
-          note={note}
-          setNote={setNote}
-          flow={flow}
-          setFlow={setFlow}
-          kapitel={kapitel}
-          setKapitel={setKapitel}
-          ort={ort}
-          setOrt={setOrt}
-          tags={tags}
-          setTags={setTags}
-          editId={editId}
-          resetForm={resetForm}
-          onClose={() => setShowPopup(false)}
+          handleEntryDelete={onDeleteChronikEntry}
+          handleEdit={handleEditChronik}
         />
       )}
     </div>
@@ -584,46 +637,29 @@ return (
   </div>
       </div>
 
-        {/* 🪄 Popup für neuen oder bearbeiteten Eintrag */}
-        <EntryPopup
-          show={showPopup}
-          onClose={() => {
-            setShowPopup(false)
-          }}
-          handleSubmit={handleSubmit}
-          note={note}
-          setNote={setNote}
-          flow={flow}
-          setFlow={setFlow}
-          kapitel={kapitel}
-          setKapitel={setKapitel}
-          ort={ort}
-          setOrt={setOrt}
-          tags={tags}
-          setTags={setTags}
-          visibleFlowIds={visibleFlowIds}
-          toggleFlow={toggleFlow}
-          handleEdit={handleEdit}
-          handleDelete={handleDelete}
-          editId={editId}
-          entries={entries}
-          resetForm={resetForm}
-          entryType={entryType}
-          setEntryType={setEntryType}
-          selectedNSC={selectedNSC}
-          setSelectedNSC={setSelectedNSC}
-          name={name}
-          setName={setName}
-          rolle={rolle}
-          setRolle={setRolle}
-          info={info}
-          setInfo={setInfo}
-          handleNSCSubmit={handleNSCSubmit}
-          editNSCId={editNSCId}
-          images={images}
-          setImages={setImages}
-          scrollToEntry={scrollToEntry}
-        />
+    {/* 🪄 Popup für neuen oder bearbeiteten Eintrag */}
+          <EntryPopup
+            show={showPopup}
+            onClose={() => {
+              setShowPopup(false)
+              setEditId(null)
+              setEditNSCId(null)
+              setSelectedNSC(null)
+            }}
+            visibleFlowIds={visibleFlowIds}
+            toggleFlow={toggleFlow}
+            entries={entries}  
+            entryType={entryType}
+            setEntryType={setEntryType}
+            selectedNSC={selectedNSC}
+            setSelectedNSC={setSelectedNSC}
+            scrollToEntry={scrollToEntry}
+            initialKapitel={initialKapitel}
+            setInitialKapitel={setInitialKapitel}
+            editId={editId} 
+            editNSCId={editNSCId} 
+            refreshEntries={fetchAllEintraege}
+          />
         
   </>
 )

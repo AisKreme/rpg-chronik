@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
+import { updateImagesInDB } from '../lib/dbHelpers'
 
 export default function ImageUploader({
   entryId,
-  bucket = 'chronik-images', // ⬅️ Standard: Chronik
+  bucket = 'chronik-images',
   initialImages = [],
   onUploadComplete,
 }) {
@@ -13,6 +14,7 @@ export default function ImageUploader({
   const [previewUrl, setPreviewUrl] = useState(null)
 
   const handleFileChange = async (e) => {
+    
     const files = Array.from(e.target.files)
     if (!files.length) return
 
@@ -22,8 +24,8 @@ export default function ImageUploader({
     for (const file of files) {
       const fileExt = file.name.split('.').pop()
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
-      const filePath = `${entryId}/${fileName}`
-
+      const filePath = `temp/${fileName}`
+console.log('📸 Hochgeladen nach:', filePath)
       const { error: uploadError } = await supabase.storage.from(bucket).upload(filePath, file)
       if (uploadError) {
         alert('Fehler beim Hochladen: ' + uploadError.message)
@@ -39,29 +41,32 @@ export default function ImageUploader({
 
     const updated = [...new Set([...localImages, ...uploadedUrls])]
     setLocalImages(updated)
-
     if (onUploadComplete) await onUploadComplete(updated)
+
     e.target.value = ''
   }
 
-  const handleDelete = async (url) => {
-    if (!confirm('Bild wirklich löschen?')) return
+        const handleImageDelete = async (url) => {
+        if (!confirm('Bild wirklich löschen?')) return
 
-    // ❗ Nur Dateiname extrahieren
-    const imagePath = url.split('/').slice(-1)[0]
-    const filePath = `${entryId}/${imagePath}`
+        const pathInStorage = url.split('/storage/v1/object/public/')[1]
+        const { error } = await supabase.storage.from(bucket).remove([pathInStorage])
 
-    const { error } = await supabase.storage.from(bucket).remove([filePath])
+        if (error) {
+          alert('Fehler beim Löschen: ' + error.message)
+          return
+        }
 
-    if (error) {
-      alert('Fehler beim Löschen: ' + error.message)
-      return
-    }
+        const updated = localImages.filter((img) => img !== url)
+        setLocalImages(updated)
 
-    const updated = localImages.filter((img) => img !== url)
-    setLocalImages(updated)
-    if (onUploadComplete) await onUploadComplete(updated)
-  }
+        // ⬇️ 📌 Jetzt auch in der DB aktualisieren – aber nur wenn es eine echte ID gibt
+        if (entryId && entryId !== 'temp') {
+          await updateImagesInDB(entryId, updated, bucket)
+        }
+
+        if (onUploadComplete) await onUploadComplete(updated)
+      }
 
   return (
     <div className="mb-4">
@@ -78,7 +83,7 @@ export default function ImageUploader({
               />
               <button
                 type="button"
-                onClick={() => handleDelete(url)}
+                onClick={() => handleImageDelete(url)}
                 className="absolute top-0 right-0 text-red-500 bg-black/70 rounded-full px-1"
                 title="Löschen"
               >
@@ -104,12 +109,10 @@ export default function ImageUploader({
         onClick={() => setShowUploader(!showUploader)}
         className="text-sm text-blue-700 underline mt-1"
       >
-        {showUploader ? 'Hochladen schließen' : 'Foto hochladen'}
+        {showUploader ? 'Hochladen schließen' : '📤 Foto hochladen'}
       </button>
 
-      {uploading && (
-        <p className="text-sm text-gray-500 mt-1">Hochladen…</p>
-      )}
+      {uploading && <p className="text-sm text-gray-500 mt-1">⏳ Hochladen…</p>}
 
       {previewUrl && (
         <div

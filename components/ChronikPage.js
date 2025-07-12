@@ -10,7 +10,7 @@ const ChronikPage = React.forwardRef(function ChronikPage(
     visibleFlowIds,
     toggleFlow,
     handleEdit,
-    handleDelete,
+    handleEntryDelete,
     note,
     flow,
     kapitel,
@@ -34,174 +34,106 @@ const ChronikPage = React.forwardRef(function ChronikPage(
 ) {
   const [selectedImage, setSelectedImage] = useState(null)
 
-  return (
-      <div
-        ref={ref}
-        className={`page ${className} !w-auto flex flex-col justify-between px-4 relative`}
-      >
-        {isForm ? (
-          // 📄 Eingabeformular
-          <div className="pointer-events-none h-full">
-            <form
-              onSubmit={handleSubmit}
-              className="pointer-events-auto h-full flex flex-col justify-between space-y-2"
-            >
-              {/* 🖋️ Eingabefelder */}
-              <textarea
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="Notiz (in-character)"
-                className="w-full bg-[#2d2a24] text-[#f0e9d2] border border-[#5a4c2c] placeholder-[#c0b9a0] rounded-md px-3 py-2 shadow-inner focus:outline-none focus:ring-2 focus:ring-yellow-600 font-serif text-base"
-              />
-              <textarea
-                value={flow}
-                onChange={(e) => setFlow(e.target.value)}
-                placeholder="Klartext"
-                className="w-full bg-[#2d2a24] text-[#f0e9d2] border border-[#5a4c2c] placeholder-[#c0b9a0] rounded-md px-3 py-2 shadow-inner focus:outline-none focus:ring-2 focus:ring-yellow-600 font-serif text-base"
-              />
-              <input
-                value={kapitel}
-                onChange={(e) => setKapitel(e.target.value)}
-                placeholder="Kapitel"
-                className="w-full bg-[#2d2a24] text-[#f0e9d2] border border-[#5a4c2c] placeholder-[#c0b9a0] rounded-md px-3 py-2 shadow-inner focus:outline-none focus:ring-2 focus:ring-yellow-600 font-serif text-base"
-              />
-              <input
-                value={ort}
-                onChange={(e) => setOrt(e.target.value)}
-                placeholder="Ort"
-                className="w-full bg-[#2d2a24] text-[#f0e9d2] border border-[#5a4c2c] placeholder-[#c0b9a0] rounded-md px-3 py-2 shadow-inner focus:outline-none focus:ring-2 focus:ring-yellow-600 font-serif text-base"
-              />
-              <input
-                value={tags}
-                onChange={(e) => setTags(e.target.value)}
-                placeholder="Tags (kommagetrennt)"
-                className="w-full bg-[#2d2a24] text-[#f0e9d2] border border-[#5a4c2c] placeholder-[#c0b9a0] rounded-md px-3 py-2 shadow-inner focus:outline-none focus:ring-2 focus:ring-yellow-600 font-serif text-base"
-              />
+ return (
+  <div
+    ref={ref}
+    className={`page ${className} !w-auto flex flex-col justify-between px-4 relative`}
+  >
+    {entry ? (
+      <>
+        <div>
+          <p className="text-xs text-gray-500">ID: {entry.id}</p>
+          <h3 className="text-lg font-bold">{entry.kapitel}</h3>
+          <p className="text-sm text-gray-600 mb-2">
+            {entry.date} – {entry.ort}
+          </p>
 
-                {editId && (
-                <ImageUploader
-                  entryId={editId.toString()}
-                  bucket="chronik-images"
-                  initialImages={images}
-                  onUploadComplete={(newImages) => setImages(newImages)}
+          <div className="italic max-h-40 overflow-y-auto pr-1 text-sm border border-gray-300 rounded bg-white p-2">
+            „{entry.note}“
+          </div>
+
+          {visibleFlowIds.includes(entry.id) && (
+            <div className="mt-3 text-gray-800 whitespace-pre-line text-sm max-h-40 overflow-y-auto pr-1 border border-gray-200 bg-white rounded p-2">
+              {entry.flow}
+            </div>
+          )}
+
+          {/* 🖼️ Bilder anzeigen */}
+          {entry.images && entry.images.length > 0 && (
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              {entry.images.map((imgPath, index) => (
+                <img
+                  key={index}
+                  src={imgPath}
+                  alt={`Bild ${index + 1}`}
+                  onClick={() => setSelectedImage(imgPath)}
+                  className="rounded shadow border border-gray-300 max-h-40 object-cover cursor-pointer hover:scale-105 transition-transform duration-200"
                 />
-                 )}
-                
-             <div className="flex gap-2 mt-2">
-              <button type="submit" className="bg-ink text-parchment px-4 py-1 rounded">
-                {editId ? 'Ändern' : 'Speichern'}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  resetForm()
-                  onClose()
-                }}
-                className="border px-4 py-1 text-gray-700 rounded"
-              >
-                Abbrechen
-              </button>
+              ))}
             </div>
-                        </form>
+          )}
+        </div>
+
+        {/* 🔘 Buttons */}
+          <div className="flex text-sm justify-center items-center h-full gap-3">
+            <button
+              onClick={() => toggleFlow(entry.id)}
+              className="px-4 py-1 rounded-full bg-blue-900 hover:bg-blue-800 text-parchment shadow-lg shadow-blue-900/30 transition-all duration-200"
+            >
+              {visibleFlowIds.includes(entry.id) ? 'Klartext verbergen' : 'Klartext'}
+            </button>
+            <button
+              onClick={() => handleEdit(entry)}
+              className="px-4 py-1 rounded-full bg-green-900 hover:bg-green-800 text-parchment shadow-lg shadow-green-900/30 transition-all duration-200"
+            >
+              Bearbeiten
+            </button>
+            <button
+              onClick={() => handleEntryDelete(entry.id)}
+              className="px-4 py-1 rounded-full bg-red-900 hover:bg-red-800 text-parchment shadow-lg shadow-red-900/30 transition-all duration-200"
+            >
+              Löschen
+            </button>
           </div>
-        ) : entry ? (
-          // 📘 Anzeige eines Eintrags
-          <>
-            <div>
-              <p className="text-xs text-gray-500">ID: {entry.id}</p>
-              <h3 className="text-lg font-bold">{entry.kapitel}</h3>
-              <p className="text-sm text-gray-600 mb-2">
-                {entry.date} – {entry.ort}
-              </p>
+      </>
+    ) : (
+      // ⚠️ Kein Eintrag vorhanden
+      <div className="text-center text-sm italic text-gray-400 mt-10">
+        ❌ Kein Eintrag vorhanden.
+      </div>
+    )}
 
-              <div className="italic max-h-40 overflow-y-auto pr-1 text-sm border border-gray-300 rounded bg-white p-2">
-                „{entry.note}“
-              </div>
-
-              {visibleFlowIds.includes(entry.id) && (
-                <div className="mt-3 text-gray-800 whitespace-pre-line text-sm max-h-40 overflow-y-auto pr-1 border border-gray-200 bg-white rounded p-2">
-                  {entry.flow}
-                </div>
-              )}
-
-              {/* 🖼️ Bilder anzeigen */}
-              {entry.images && entry.images.length > 0 && (
-                <div className="mt-4 grid grid-cols-2 gap-2">
-                  {entry.images.map((imgPath, index) => (
-                    <img
-                      key={index}
-                      src={imgPath}
-                      alt={`Bild ${index + 1}`}
-                      onClick={() => setSelectedImage(imgPath)}
-                      className="rounded shadow border border-gray-300 max-h-40 object-cover cursor-pointer hover:scale-105 transition-transform duration-200"
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* 🔘 Buttons */}
-            <NoFlip>
-              <div className="flex text-sm justify-center items-center h-full gap-3">
-                <button
-                  onClick={() => toggleFlow(entry.id)}
-                  className="px-4 py-1 rounded-full bg-blue-900 hover:bg-blue-800 text-parchment shadow-lg shadow-blue-900/30 transition-all duration-200"
-                >
-                  {visibleFlowIds.includes(entry.id) ? 'Klartext verbergen' : 'Klartext'}
-                </button>
-                <button
-                  onClick={() => handleEdit(entry)}
-                  className="px-4 py-1 rounded-full bg-green-900 hover:bg-green-800 text-parchment shadow-lg shadow-green-900/30 transition-all duration-200"
-                >
-                  Bearbeiten
-                </button>
-                <button
-                  onClick={() => handleDelete(entry.id)}
-                  className="px-4 py-1 rounded-full bg-red-900 hover:bg-red-800 text-parchment shadow-lg shadow-red-900/30 transition-all duration-200"
-                >
-                  Löschen
-                </button>
-              </div>
-            </NoFlip>
-          </>
-        ) : (
-          // ⚠️ Wenn kein `entry` vorhanden
-          <div className="text-center text-sm italic text-gray-400 mt-10">
-            ❌ Kein Eintrag vorhanden.
-          </div>
-        )}
-
-        {/* 🔍 Bildvergrößerung */}
-        {selectedImage && (
-          <div
-            className="fixed inset-0 z-[999] flex items-center justify-center bg-black bg-opacity-70 animate-fade-in"
+    {/* 🔍 Bildvergrößerung */}
+    {selectedImage && (
+      <div
+        className="fixed inset-0 z-[999] flex items-center justify-center bg-black bg-opacity-70 animate-fade-in"
+        onClick={() => setSelectedImage(null)}
+      >
+        <div
+          className="relative bg-[#1c1b18] p-4 rounded-lg shadow-xl border border-yellow-700 max-w-[90%] max-h-[90%] overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <img
+            src={selectedImage}
+            alt="Vergrößertes Bild"
+            className="max-w-full max-h-[80vh] rounded transition-transform duration-300 transform scale-100"
+          />
+          <button
+            className="absolute top-2 right-2 text-red-700 hover:text-yellow-200 text-2xl font-bold"
             onClick={() => setSelectedImage(null)}
           >
-            <div
-              className="relative bg-[#1c1b18] p-4 rounded-lg shadow-xl border border-yellow-700 max-w-[90%] max-h-[90%] overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <img
-                src={selectedImage}
-                alt="Vergrößertes Bild"
-                className="max-w-full max-h-[80vh] rounded transition-transform duration-300 transform scale-100"
-              />
-              <button
-                className="absolute top-2 right-2 text-red-700 hover:text-yellow-200 text-2xl font-bold"
-                onClick={() => setSelectedImage(null)}
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* 📄 Seitenzahl unten zentriert */}
-        <div className="absolute bottom-1 left-0 right-0 text-center text-xs text-yellow-600 font-serif tracking-wide select-none">
-          Seite {idx + 1}
+            ✕
+          </button>
         </div>
       </div>
-  )
+    )}
+
+    {/* 📄 Seitenzahl unten zentriert */}
+    <div className="absolute bottom-1 left-0 right-0 text-center text-xs text-yellow-600 font-serif tracking-wide select-none">
+      Seite {idx + 1}
+    </div>
+  </div>
+)
 })
 
 export default ChronikPage

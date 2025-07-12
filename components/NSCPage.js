@@ -1,4 +1,6 @@
-export default function NSCPage({ eintrag, onEdit, onDelete }) {
+
+
+export default function NSCPage({ eintrag, onNSCEdit, onNSCDelete }) {
   // Spielercharakter
   if (eintrag.typ === 'sc') {
     const char = eintrag.eintrag
@@ -7,8 +9,8 @@ export default function NSCPage({ eintrag, onEdit, onDelete }) {
         <h1 className="text-2xl font-bold mb-2 text-yellow-300 text-center">🧙 Spielercharaktere</h1>
         {char ? (
           <div className="relative border border-yellow-700 p-3 rounded bg-[#1f1d1a] shadow">
-            <button onClick={() => onEdit(char)} className="absolute top-2 right-8 text-sm hover:scale-110">✏️</button>
-            <button onClick={() => onDelete(char.id)} className="absolute top-2 right-2 text-sm hover:scale-110">🗑️</button>
+            <button onClick={() => onNSCEdit(char)} className="absolute top-2 right-8 text-sm hover:scale-110">✏️</button>
+            <button onClick={() => onNSCDelete(char.id)} className="absolute top-2 right-2 text-sm hover:scale-110">🗑️</button>
             <h3 className="text-lg font-bold text-yellow-300">{char.name}</h3>
             <p className="italic text-yellow-500">{char.rolle}</p>
             <p className="mt-1 text-sm">{char.info}</p>
@@ -35,8 +37,8 @@ export default function NSCPage({ eintrag, onEdit, onDelete }) {
         <h1 className="text-2xl font-bold mb-2 text-yellow-300 text-center">🧙 NSCs</h1>
         {eintrag.gruppe.map((nsc) => (
           <div key={nsc.id} className="relative border border-yellow-700 p-3 mb-4 rounded bg-[#1f1d1a] shadow">
-            <button onClick={() => onEdit(nsc)} className="absolute top-2 right-8 text-sm hover:scale-110">✏️</button>
-            <button onClick={() => onDelete(nsc.id)} className="absolute top-2 right-2 text-sm hover:scale-110">🗑️</button>
+            <button onClick={() => onNSCEdit(nsc)} className="absolute top-2 right-8 text-sm hover:scale-110">✏️</button>
+            <button onClick={() => onNSCDelete(nsc.id)} className="absolute top-2 right-2 text-sm hover:scale-110">🗑️</button>
             <h3 className="text-lg font-bold text-yellow-300">{nsc.name}</h3>
             <p className="italic text-yellow-500">{nsc.rolle}</p>
             <p className="mt-1 text-sm">{nsc.info}</p>

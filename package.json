@@ -11,6 +11,7 @@
     "@supabase/supabase-js": "^2.39.3",
     "autoprefixer": "^10.4.16",
     "framer-motion": "^12.23.1",
+    "html2pdf.js": "^0.10.3",
     "next": "14.1.0",
     "postcss": "^8.4.24",
     "react": "18.2.0",
