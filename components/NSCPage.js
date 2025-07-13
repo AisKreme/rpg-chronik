@@ -10,35 +10,38 @@ export default function NSCPage({ eintrag, onNSCEdit, onNSCDelete }) {
   }
 
   const ImagePreview = () => (
-    <AnimatePresence>
-      {previewUrl && (
-        <motion.div
-          className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+<AnimatePresence>
+    {previewUrl && (
+      <motion.div
+        key="preview-wrapper"
+        className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={() => setPreviewUrl(null)}
+      >
+        <motion.img
+          src={previewUrl}
+          className="max-w-[90%] max-h-[90%] border-4 border-yellow-700 rounded shadow-xl"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.8, opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        />
+        <button
+          className="absolute top-4 right-4 text-yellow-200 bg-black/70 px-2 rounded"
           onClick={() => setPreviewUrl(null)}
         >
-          <motion.img
-            src={previewUrl}
-            className="max-w-[90%] max-h-[90%] border-4 border-yellow-700 rounded shadow-xl"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
-          />
-          <button
-            className="absolute top-4 right-4 text-yellow-200 bg-black/70 px-2 rounded"
-            onClick={() => setPreviewUrl(null)}
-          >
-            ✕
-          </button>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          ❌
+        </button>
+      </motion.div>
+    )}
+  </AnimatePresence>
+
   )
 
 const sparkleHeader = (emoji, text, colorClass) => (
-  <h1 className="text-2xl font-bold mb-2 text-center relative font-magisch flex items-center justify-center gap-2">
+  <h1 className="text-2xl font-bold mb-2 text-center relative font-dunkel flex items-center justify-center gap-2">
     <span className={`${colorClass} text-3xl`}>{emoji}</span>
     <span className={`relative inline-block ${colorClass}`}>
       <span className="relative z-10 animate-holo-glow">{text}</span>

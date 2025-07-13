@@ -34,6 +34,7 @@ const ChronikPage = React.forwardRef(function ChronikPage(
   ref
 ) {
   const [selectedImage, setSelectedImage] = useState(null)
+  
 
   return (
 <div
@@ -74,8 +75,8 @@ const ChronikPage = React.forwardRef(function ChronikPage(
           {entry.date} – {entry.ort}
         </p>
 
-        {/* ✍️ Notiz (größer) */}
-        <div className="italic max-h-[330px] overflow-y-auto pr-1 text-sm border border-yellow-700 rounded bg-[#fffaf0] text-black p-2 whitespace-pre-wrap font-serif">
+        {/* ✍️ Notiz */}
+        <div className="max-h-[330px] overflow-y-auto pr-1 text-sm border border-yellow-700 rounded bg-[#fffaf0] text-black p-2 whitespace-pre-wrap font-serif">
           „{entry.note}“
         </div>
 
@@ -132,7 +133,7 @@ const ChronikPage = React.forwardRef(function ChronikPage(
         className="absolute top-4 right-4 text-yellow-200 bg-black/70 px-2 rounded"
         onClick={() => setSelectedImage(null)}
       >
-        ✕
+        ❌
       </button>
     </motion.div>
   )}
