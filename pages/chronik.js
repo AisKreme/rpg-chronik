@@ -16,12 +16,6 @@ import { deleteChronikEntry, deleteNSCEntry } from '../lib/deleteHelpers'
 
 
 export default function Chronik() {
-// // 📋 State-Variablen für Eintragsdaten
-//   const [note, setNote] = useState('')
-//   const [flow, setFlow] = useState('')
-//   const [kapitel, setKapitel] = useState('')
-//   const [ort, setOrt] = useState('')
-//   const [tags, setTags] = useState('')
 
   // 📋 Allgemeine Zustände
   const [entries, setEntries] = useState([])
@@ -46,10 +40,6 @@ export default function Chronik() {
     const [entryType, setEntryType] = useState('chronik') // Standard: Chronik-Eintrag
     const [selectedNSC, setSelectedNSC] = useState(null)
 
-    // const [name, setName] = useState('')
-    // const [rolle, setRolle] = useState('')
-    // const [info, setInfo] = useState('')
-    // const [images, setImages] = useState([])
 
     useEffect(() => {
       fetchEntries()
@@ -92,21 +82,7 @@ export default function Chronik() {
 
   if (!error) setNSCs(data)
 }
-  
-  // Vielleicht LÖSCHE - Selbstversuch
-  // async function fetchNSCs() {
-  //     const { data, error } = await supabase
-  //       .from('nscs')
-  //       .select('id, name, rolle, info, images')
-  //       .order('created_at', { ascending: true })
-  //     if (!error) setNSCs(data)
-  //   }
 
-    //LÖSCHEN
-    //     function onDeleteChronikEntry(id) {
-    //   if (!confirm('Eintrag wirklich löschen?')) return
-    //   deleteChronikEntry(id).then(() => fetchEntries())
-    // }
 
     //NEU
     function handleEditChronik(entry) {
@@ -141,122 +117,6 @@ const handleDeleteNSC = async (id) => {
   await fetchNSCs()
 }
 
-//LÖSCHEN
-
-// const handleNSCSubmit = async () => {
-//   console.log('🧪 [handleNSCSubmit STARTED]');
-//   console.log('📝 Eingabedaten:', { editNSCId, name, rolle, info, images });
-
-//   // 🔁 Bestehenden NSC aktualisieren
-//   if (editNSCId) {
-//     console.log('✏️ Versuche Update für ID:', editNSCId);
-//     const { error } = await supabase
-//       .from('nscs')
-//       .update({ name, rolle, info, images })
-//       .eq('id', editNSCId);
-      
-
-//     if (error) {
-//       console.error('❌ Fehler beim Aktualisieren:', error.message);
-//       alert('Fehler beim Aktualisieren: ' + error.message);
-//     } else {
-//       console.log('✅ Update erfolgreich für NSC-ID:', editNSCId);
-//       resetForm();
-//     }
-//     return;
-//   }
-
-//   // ➕ Neuer NSC wird erstellt
-//   console.log('➕ Neuer NSC wird erstellt...');
-//   const insertPayload = { name, rolle, info };
-//   console.log('📦 Insert-Daten:', insertPayload);
-
-//   const { data, error } = await supabase
-//     .from('nscs')
-//     .insert(insertPayload)
-//     .select('id')
-//     .single();
-
-//   if (error) {
-//     console.error('❌ Fehler beim INSERT:', error.message);
-//     alert('Fehler beim Erstellen: ' + error.message);
-//     return;
-//   }
-
-//   console.log('✅ NSC erstellt mit ID:', data.id);
-//   const newId = data.id.toString();
-
-//   // 📦 Bilder verschieben aus temp in npcs/<newId>
-//   console.log('📂 Verschiebe Bilder nach Ordner npcs/' + newId);
-//   const movedImages = await moveImagesToFinalFolder(images, newId, 'npcs');
-//   console.log('📦 Neue Bildpfade:', movedImages);
-
-//   // 🔄 Bilder im NSC-Eintrag nachträglich speichern
-//   const { error: updateError } = await supabase
-//     .from('nscs')
-//     .update({ images: movedImages })
-//     .eq('id', newId);
-
-//   if (updateError) {
-//     console.error('❌ Fehler beim Bild-Update:', updateError.message);
-//     alert('Fehler beim Hinzufügen der Bilder: ' + updateError.message);
-//     return;
-//   }
-
-//   console.log('✅ Bilder aktualisiert für NSC-ID:', newId);
-//   if (fetchNSCs) await fetchNSCs()
-//   if (scrollToEntry) scrollToEntry(newId)
-
-//   // 🧹 Formular zurücksetzen
-//   setEditNSCId(null);
-//   setImages([]);
-//   resetForm();
-//   console.log('🎉 Vorgang abgeschlossen – NSC gespeichert');
-// };
-
- 
-
-//LÖSCHEN
-
-// function resetForm(newId = null) {
-//   // Chronik-Felder
-//   setNote('')
-//   setFlow('')
-//   setKapitel('')
-//   setOrt('')
-//   setTags('')
-//   setEditId(null)
-
-//   // NSC-Felder
-//   setName('')
-//   setRolle('')
-//   setInfo('')
-//   setEditNSCId?.(null)
-//   setSelectedNSC(null)
-
-//   // Allgemeines
-//   setImages([])
-//   setEntryType('chronik')
-
-//   // Optionales Scrollen
-//   if (newId) {
-//     scrollToEntry?.(newId)
-//   }
-
-//   // Nachladen
-//   fetchEntries?.()
-//   fetchNSCs?.()
-// }
-
-
-// function handleEdit(entry) {
-//   setEditId(entry.id)
-//   setEntryType('chronik')
-//   setImages(entry.images || [])
-//   setShowPopup(true)
-// }
-
-
     //NEU
     function openNewEntryPopup(type = 'chronik') {
       setEntryType(type)
@@ -280,103 +140,12 @@ const handleDeleteNSC = async (id) => {
     }
 
 
-
-// LÖSCHEN
-// function openNewEntryPopup(type = 'chronik') {
-//   setEntryType(type)
-//   if (type === 'chronik' && !editId) {
-//     const letztesKapitel = entries[entries.length - 1]?.kapitel || ''
-//     setKapitel(letztesKapitel)
-//   }
-//   setSelectedNSC(null)
-//   setShowPopup(true)
-// }
-
-
- 
-
-
-  // LÖSCHEN
-
-
-  //   const handleSubmit = async (e = null) => {
-  //     if (e) e.preventDefault()
-  //     const heute = new Date().toLocaleDateString('de-DE')
-
-  //   const payload = {
-  //     note,
-  //     flow,
-  //     kapitel,
-  //     ort,
-  //     tags: tags.split(',').map((t) => t.trim()),
-  //     date: heute,
-  //     images,
-  //   }
-
-  //   if (editId) {
-  //     const { error } = await supabase
-  //       .from('chronik_entries')
-  //       .update(payload)
-  //       .eq('id', editId)
-
-  //     if (error) alert('Fehler beim Aktualisieren: ' + error.message)
-  //     else {
-  //       resetForm()
-  //     }
-  //   } else {
-  //     const { data, error } = await supabase
-  //       .from('chronik_entries')
-  //       .insert(payload)
-  //       .select('id')
-  //       .single()
-
-        
-  //     if (error) alert('Fehler: ' + error.message)
-  //     else {
-  //       resetForm()
-  //     }
-  //   }
-  // }
-
   function toggleFlow(id) {
     setVisibleFlowIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     )
   }
 
-//LÖSCHEN
-
- // async function moveImagesToFinalFolder(images, newId, bucket) {
-//   const movedUrls = []
-
-//   for (const url of images) {
-//     if (!url.includes('/temp/')) {
-//       movedUrls.push(url)
-//       continue
-//     }
-
-//     const oldPath = url.split('/storage/v1/object/public/')[1]
-//     const filename = oldPath.split('/').pop()
-//     const newPath = `${newId}/${filename}`
-
-//     const { error: copyError } = await supabase
-//       .storage
-//       .from(bucket)
-//       .copy(oldPath, newPath)
-
-//     if (copyError) {
-//       console.error('Fehler beim Kopieren:', copyError)
-//       continue
-//     }
-
-//     await supabase.storage.from(bucket).remove([oldPath])
-
-//    const publicUrl = `${supabaseUrl}/storage/v1/object/public/${bucket}/${newPath}`
-//     movedUrls.push(publicUrl)
-//   }
-
-//   return movedUrls
-// }
 
         // 📖 Seitenaufbau vorbereiten – inklusive Inhaltsverzeichnis und Timeline
         const pages = []
@@ -460,6 +229,8 @@ const handleDeleteNSC = async (id) => {
           bookRef.current?.pageFlip().flip(page)
         }, 200)
       }
+  
+  //Pfeiltasten Seiten Move
   function goNext() {
     if (bookRef.current) {
       bookRef.current.pageFlip().flipNext()
@@ -471,16 +242,6 @@ const handleDeleteNSC = async (id) => {
       bookRef.current.pageFlip().flipPrev()
     }
   }
-
-//LÖSCHEN
-// const handleDeleteNSC = async (id) => {
-//   const confirmed = confirm('NSC wirklich löschen?')
-//   if (!confirmed) return
-
-//   await deleteAllImages(id, 'npcs')
-//   await supabase.from('nscs').delete().eq('id', id)
-//   fetchNSCs()
-//}
 
 
 
@@ -599,13 +360,7 @@ return (
           eintrag={entry}
           onNSCDelete={handleDeleteNSC}
           onNSCEdit={handleEditNSC}
-          //LÖSCHEN
-          // onDelete={async (id) => {
-          //   if (!confirm('NSC wirklich löschen?')) return
-          //   const { error } = await supabase.from('nscs').delete().eq('id', id)
-          //   if (!error) fetchNSCs()
-          // }}
-
+         
         />
       ) : (
         <ChronikPage

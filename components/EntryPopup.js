@@ -34,13 +34,8 @@ const [name, setName] = useState('')
 const [rolle, setRolle] = useState('')
 const [info, setInfo] = useState('')
 
-//LÖSCHEN
-//const [editId, setEditId] = useState(null)
 
 const [images, setImages] = useState([])
-
-//LÖSCHEN
-//const isEditMode = !!editId || !!selectedNSC
 
 //NEU 
 const isEditModeChronik = entryType === 'chronik' && !!editId
@@ -48,51 +43,6 @@ const isEditModeNSC = entryType === 'nsc' && !!editNSCId
 const isEditMode = isEditModeChronik || isEditModeNSC
 
 
-// const [internalEditId, setInternalEditId] = useState(null)
-// const [internalEditNSCId, setInternalEditNSCId] = useState(null)
-
-
-
-// useEffect(() => {
-//   if (editId) setInternalEditId(editId)
-//   if (editNSCId) setEditNSCId(editNSCId)
-// }, [editId, editNSCId])
-
-
-//
-// async function deleteNSCEntry(id) {
-//   const confirmed = confirm('NSC wirklich löschen?')
-//   if (!confirmed) return
-//   const element = pageRefs.current?.[id]
-//   await exportPageAsPDF(element, `NSC-Seite-${id}.pdf`)
-//   await deleteAllImages(id, 'npcs')
-//   await supabase.from('nscs').delete().eq('id', id)
-// }
-
-// 
-// async function deleteChronikEntry(id) {
-//   const confirmed = confirm('Eintrag wirklich löschen?')
-//   if (!confirmed) return
-//   const element = pageRefs.current?.[id]
-//   await exportPageAsPDF(element, `Chronik-ID-${id}.pdf`)
-//   await deleteAllImages(id, 'chronik-images')
-//   await supabase.from('chronik_entries').delete().eq('id', id)
-// }
-
-
-//LÖSCHEN
-// useEffect(() => {
-//   if (entryType === 'chronik' && !editId && initialKapitel) {
-//     setKapitel(initialKapitel)
-//   }
-// }, [entryType, editId, initialKapitel])
-
-// useEffect(() => {
-//     setInternalEditId(editId || null)
-//     setInternalEditNSCId(editNSCId || null)
-//   }, [editId, editNSCId])
-
-//NEU
 useEffect(() => {
     if (entryType === 'chronik' && editId) {
       const eintrag = entries.find((e) => e.id === editId)
@@ -135,7 +85,7 @@ const resolvedEntryId =
 
 
 
-    //NEU
+ 
         useEffect(() => {
           if (!show) return
 
@@ -164,8 +114,6 @@ const resolvedEntryId =
     
 
 
-
-//SEHR NEU
 const handleSave = async (e) => {
     e?.preventDefault()
 
@@ -192,33 +140,12 @@ const handleSave = async (e) => {
   }
 
 
-
-
-
-
-
-//ALT
-  // NSC-Daten vorbereiten beim Bearbeiten
-  // useEffect(() => {
-  //   if (entryType === 'nsc' && selectedNSC) {
-  //     setName(selectedNSC.name || '')
-  //     setRolle(selectedNSC.rolle || '')
-  //     setInfo(selectedNSC.info || '')
-  //     setImages(selectedNSC.images || [])
-  //   }
-  // }, [entryType, selectedNSC])
-
-
-
-
-  //NEU
   const handleTypeChange = (type) => {
   resetFormLocal() // Felder leeren
   setEntryType(type) // Typ neu setzen
 }
 
 
-//NEU
 function resetFormLocal(newId = null) {
   // Chronik-Felder
   setNote('')
@@ -237,18 +164,6 @@ function resetFormLocal(newId = null) {
   setSelectedNSC(null)
 }
 
-  //LÖSCHEN
-  // Eintrag speichern je nach Typ
-  // const handleSave = async (e) => {
-  //   e?.preventDefault()
-  //   let newId = null
-  //   if (entryType === 'chronik') {
-  //     newId = await handleSubmit(e)
-  //   } else if (entryType === 'nsc') {
-  //     newId = await handleNSCSubmit()
-  //   }
-  //   resetForm(newId)
-  // }
 
  return (
   <AnimatePresence>
