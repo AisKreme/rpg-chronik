@@ -38,7 +38,7 @@ export default function NSCPage({ eintrag, onNSCEdit, onNSCDelete }) {
   )
 
 const sparkleHeader = (emoji, text, colorClass) => (
-  <h1 className="text-2xl font-bold mb-2 text-center relative font-dunkel flex items-center justify-center gap-2">
+  <h1 className="text-2xl font-bold mb-2 text-center relative font-magisch flex items-center justify-center gap-2">
     <span className={`${colorClass} text-3xl`}>{emoji}</span>
     <span className={`relative inline-block ${colorClass}`}>
       <span className="relative z-10 animate-holo-glow">{text}</span>

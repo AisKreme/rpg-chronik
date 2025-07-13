@@ -2,25 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer{
 @font-face {
   font-family: 'Dunkel';
-  src: url('/fonts/Dunkel.woff') format('woff');
+  src: url('/fonts/dunkel.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Magisch';
-  src: url('/fonts/Magisch.woff2') format('woff2');
+  src: url('/fonts/magisch.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Verzaubert';
-  src: url('/fonts/Verzaubert.ttf') format('truetype');
+  src: url('/fonts/verzaubert.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+}
 }
 
 html, body {
@@ -33,7 +35,7 @@ html, body {
 body {
   background-color: #12100e;
   color: #f5e8c7;
-  font-family: 'Dunkel', serif;
+  font-family: 'Garamond', serif;
 }
 
 /* 📖 Flipbook-Rahmen */

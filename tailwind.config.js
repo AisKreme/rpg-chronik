@@ -6,9 +6,11 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        dunkel: ['"Dunkel"', 'serif'],
-        magisch: ['"Magisch"', 'serif'],
-        verzaubert: ['"Verzaubert"', 'cursive'],
+        serif: ['EB Garamond', 'serif'],
+        sans: ['Inter', 'sans-serif'],
+        dunkel: ['Dunkel', 'serif'],
+        magisch: ['Magisch', 'serif'],
+        verzaubert: ['Verzaubert', 'cursive'],
       },
       colors: {
         parchment: '#fdf6e3',
