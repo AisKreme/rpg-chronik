@@ -323,7 +323,7 @@ return (
 
 
       {/* 🔍 Suchleiste über dem Buch */}
-      <div className="flex justify-center mb-6">
+      <div className="hidden md:flex justify-center mb-6">
         <input
           type="text"
           placeholder="🔍 Suche nach Schlagwort, Ort, Kapitel ..."
