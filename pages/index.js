@@ -62,7 +62,7 @@ export default function Home() {
             value={pw}
             onChange={(e) => setPw(e.target.value)}
             placeholder="..."
-            className="px-4 py-2 rounded bg-gray-900 border border-gray-600 text-center text-white mb-2"
+            className="px-4 py-2 rounded bg-gray-900 border border-gray-600 text-center text-white mb-2 font-sans"
           />
           <button
             onClick={checkAccess}

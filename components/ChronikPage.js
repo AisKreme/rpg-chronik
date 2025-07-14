@@ -39,7 +39,8 @@ const ChronikPage = React.forwardRef(function ChronikPage(
   return (
 <div
   ref={ref}
-  className={`page ${className} !w-auto flex flex-col justify-between px-4 relative`}
+  className={`page ${className} !w-auto flex flex-col justify-between px-4 relative`} 
+  data-entry-id={entry?.id}
 >
   {entry ? (
     <>
