@@ -35,7 +35,7 @@ html, body {
 body {
   background-color: #12100e;
   color: #f5e8c7;
-  font-family: 'Garamond', serif;
+  font-family: 'magisch', serif;
 }
 
 /* 📖 Flipbook-Rahmen */
@@ -175,21 +175,67 @@ display: flex;
 
 
 
-/* ⬇️ Hier hinzufügen */
 @keyframes holo-glow {
   0% {
-    text-shadow: 0 0 2px #fff, 0 0 10px #0ff, 0 0 20px #0ff;
+    text-shadow: 0 0 2px var(--glow-base), 0 0 10px var(--glow-mid), 0 0 20px var(--glow-mid);
   }
   50% {
-    text-shadow: 0 0 2px #fff, 0 0 15px #6ff, 0 0 25px #6ff;
+    text-shadow: 0 0 2px var(--glow-base), 0 0 15px var(--glow-peak), 0 0 25px var(--glow-peak);
   }
   100% {
-    text-shadow: 0 0 2px #fff, 0 0 10px #0ff, 0 0 20px #0ff;
+    text-shadow: 0 0 2px var(--glow-base), 0 0 10px var(--glow-mid), 0 0 20px var(--glow-mid);
   }
 }
-.animate-holo-glow {
+
+.glow-yellow {
+  --glow-base: #fff;
+  --glow-mid: #facc15;   /* yellow-400 */
+  --glow-peak: #fde047;  /* yellow-300 */
   animation: holo-glow 2.5s ease-in-out infinite;
 }
+
+.glow-blue {
+  --glow-base: #fff;
+  --glow-mid: #0ea5e9;   /* sky-500 */
+  --glow-peak: #38bdf8;  /* sky-400 */
+  animation: holo-glow 2.5s ease-in-out infinite;
+}
+
+.glow-pink {
+  --glow-base: #fff;
+  --glow-mid: #ec4899;   /* pink-500 */
+  --glow-peak: #f472b6;  /* pink-400 */
+  animation: holo-glow 2.5s ease-in-out infinite;
+}
+
+.glow-orange {
+  --glow-base: #fff;
+  --glow-mid: #fb923c;
+  --glow-peak: #fdba74;
+  animation: holo-glow 2.5s ease-in-out infinite;
+}
+
+.glow-green {
+  --glow-base: #fff;
+  --glow-mid: #22c55e;
+  --glow-peak: #4ade80;
+  animation: holo-glow 2.5s ease-in-out infinite;
+}
+
+.glow-purple {
+  --glow-base: #fff;
+  --glow-mid: #a855f7;
+  --glow-peak: #c084fc;
+  animation: holo-glow 2.5s ease-in-out infinite;
+}
+
+.glow-red {
+  --glow-base: #fff;
+  --glow-mid: #ef4444;
+  --glow-peak: #f87171;
+  animation: holo-glow 2.5s ease-in-out infinite;
+}
+
 
 @keyframes glimmer {
   0% {
@@ -205,3 +251,4 @@ display: flex;
 .animate-glimmer {
   animation: glimmer 1.8s ease-in-out infinite;
 }
+

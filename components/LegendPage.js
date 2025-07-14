@@ -35,7 +35,7 @@ export default function LegendPage({
   }
 
   return (
-    <div className="w-full h-full p-6 bg-[#1c1b18] text-yellow-300 font-serif overflow-y-auto">
+    <div className="w-full h-full p-6 bg-[#1c1b18] text-yellow-300 overflow-y-auto">
       <h2 className="text-2xl font-bold mb-4 border-b border-yellow-700 pb-2">
         🗺 Legende zur Karte: <span className="italic text-yellow-400">{mapType}</span>
       </h2>

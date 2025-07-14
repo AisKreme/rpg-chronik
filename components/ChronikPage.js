@@ -72,17 +72,22 @@ const ChronikPage = React.forwardRef(function ChronikPage(
         {/* <p className="text-xs text-yellow-600">ID: {entry.id}</p>*/}
         <h3 className="text-lg font-bold text-yellow-300">{entry.kapitel}</h3>
         <p className="text-sm text-yellow-500 mb-2">
-          {entry.date} – {entry.ort}
+        <span className="font-sans">
+          {entry.date}
+        </span>
+        {" "}
+        <span>
+          - {entry.ort}
+        </span>
         </p>
-
         {/* ✍️ Notiz */}
-        <div className="max-h-[330px] overflow-y-auto pr-1 text-sm border border-yellow-700 rounded bg-[#fffaf0] text-black p-2 whitespace-pre-wrap font-serif">
+        <div className="max-h-[330px] overflow-y-auto pr-1 text-sm border border-yellow-700 rounded bg-[#fffaf0] text-black p-2 whitespace-pre-wrap font-sans">
           „{entry.note}“
         </div>
 
         {/* 📖 Klartext */}
         {visibleFlowIds.includes(entry.id) && (
-          <div className="mt-3 text-black whitespace-pre-wrap text-sm max-h-40 overflow-y-auto pr-1 border border-yellow-700 bg-[#fffaf0] rounded p-2 font-serif">
+          <div className="mt-3 text-black whitespace-pre-wrap text-sm max-h-40 overflow-y-auto pr-1 border border-yellow-700 bg-[#fffaf0] rounded p-2 font-sans">
             {entry.flow}
           </div>
         )}
@@ -140,7 +145,7 @@ const ChronikPage = React.forwardRef(function ChronikPage(
 </AnimatePresence>
 
   {/* 📄 Seitenzahl */}
-  <div className="absolute bottom-1 left-0 right-0 text-center text-xs text-yellow-600 font-serif tracking-wide select-none">
+  <div className="absolute bottom-1 left-0 right-0 text-center text-xs text-yellow-600 font-sans tracking-wide select-none">
     Seite {idx + 1}
   </div>
 </div>

@@ -33,7 +33,7 @@ export default function Inhaltsverzeichnis({ entries, seitenMap, goToPage }) {
     if (uniqueSeiten.length === 1) {
       return (
         <li className="cursor-pointer hover:text-yellow-300" onClick={() => goToPage(uniqueSeiten[0])}>
-          {ort} <span className="text-xs text-yellow-400">S.{uniqueSeiten[0]}</span>
+          {ort} <span className="text-xs text-yellow-400 font-sans">S.{uniqueSeiten[0]}</span>
         </li>
       )
     }
@@ -59,7 +59,14 @@ export default function Inhaltsverzeichnis({ entries, seitenMap, goToPage }) {
 
   return (
     <div className="page flex flex-col justify-start gap-4 overflow-y-auto">
-      <h2 className="text-2xl font-bold text-center">📖 Inhaltsverzeichnis</h2>
+  <h1 className="text-4xl font-bold mb-2 text-center relative font-verzaubert flex items-center justify-center gap-2">
+    <span className="text-2xl leading-none align-middle relative top-[1px]">📖+{" "}</span>
+    <span className={`relative inline-block `}>
+      <span className="relative z-10 glow-yellow text-yellow-700">Inhaltsverzeichnis</span>   
+      <span className="absolute inset-0 blur-sm animate-glimmer from-white/10 via-yellow-400/30 to-white/10" />
+    </span>
+    <span className="text-2xl leading-none align-middle relative top-[1px]">{" "}+📖</span>
+  </h1>
 
       <div className="grid grid-cols-2 gap-4 text-sm text-gray-300">
         {/* 🧱 Linke Spalte */}

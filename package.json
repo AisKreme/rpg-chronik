@@ -20,6 +20,7 @@
     "react-pageflip": "^2.0.3",
     "react-zoom-pan-pinch": "^3.7.0",
     "tailwindcss": "^3.4.1",
-    "turn.js": "^1.0.5"
+    "turn.js": "^1.0.5",
+    "use-sound": "^5.0.0"
   }
 }

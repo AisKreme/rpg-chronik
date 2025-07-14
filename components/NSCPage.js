@@ -40,13 +40,14 @@ export default function NSCPage({ eintrag, onNSCEdit, onNSCDelete }) {
 
   )
 
-const sparkleHeader = (emoji, text, colorClass) => (
-  <h1 className="text-2xl font-bold mb-2 text-center relative font-dunkel flex items-center justify-center gap-2">
-    <span className={`${colorClass} text-3xl`}>{emoji}</span>
-    <span className={`relative inline-block ${colorClass}`}>
-      <span className="relative z-10 animate-holo-glow">{text}</span>
+const sparkleHeader = (emoji, text, colorClass, glowColor) => (
+  <h1 className="text-4xl font-bold mb-2 text-center relative font-verzaubert flex items-center justify-center gap-2">
+    <span className={`${colorClass} text-2xl`}>{emoji}+{" "}</span>
+    <span className={`relative inline-block ${colorClass} ${glowColor}`}>
+      <span className="relative z-10">{text} </span>   
       <span className="absolute inset-0 blur-sm animate-glimmer from-white/10 via-yellow-400/30 to-white/10" />
     </span>
+    <span className={`${colorClass} text-3xl`}>{" "}+{emoji}</span>
   </h1>
 )
 
@@ -62,8 +63,8 @@ const sparkleHeader = (emoji, text, colorClass) => (
     const char = eintrag.eintrag
     return (
       <div className="flex flex-col items-center">
-        <div className="relative w-[420px] h-[530px] overflow-y-auto border border-blue-800 bg-[#1a1e24] text-parchment p-4 shadow-xl font-serif">
-          {sparkleHeader('🧙', 'Spielercharakter', 'text-blue-900')}
+        <div className="relative w-[420px] h-[530px] overflow-y-auto border border-blue-800 bg-[#1a1e24] text-parchment p-4 shadow-xl">
+          {sparkleHeader('🧙', 'Spielercharakter', 'text-blue-900', 'glow-blue')}
           {char ? (
             <div className="relative border border-blue-700 p-3 rounded bg-[#0f1012] shadow">
               <button onClick={() => onNSCEdit(char)} className="absolute top-2 right-8 text-sm hover:scale-110">✏️</button>
@@ -75,13 +76,13 @@ const sparkleHeader = (emoji, text, colorClass) => (
                   <p className="italic text-yellow-500">{char.rolle}</p>
                 </div>
               </div>
-              <pre className="mt-2 text-sm whitespace-pre-wrap font-serif">{char.info}</pre>
+              <pre className="mt-2 text-sm whitespace-pre-wrap font-sans">{char.info}</pre>
             </div>
           ) : (
             <div className="text-center text-yellow-500 mt-20">❌ Kein Eintrag vorhanden.</div>
           )}
         </div>
-        <div className="w-[420px] h-[20px] bg-[#1a1e24] text-center text-xs text-blue-600 font-serif">
+        <div className="w-[420px] h-[20px] bg-[#1a1e24] text-center text-xs text-blue-600">
           Spielercharaktere
         </div>
         <ImagePreview />
@@ -92,8 +93,8 @@ const sparkleHeader = (emoji, text, colorClass) => (
   if (eintrag.typ === 'nsc') {
     return (
       <div className="flex flex-col items-center">
-        <div className="relative w-[420px] h-[530px] overflow-y-auto border border-green-800 bg-[#1a1e24] text-parchment p-4 shadow-xl font-serif">
-          {sparkleHeader('🧌', 'NSCs', 'text-green-900')}
+        <div className="relative w-[420px] h-[530px] overflow-y-auto border border-green-800 bg-[#1a1e24] text-parchment p-4 shadow-xl">
+          {sparkleHeader('🧌', 'NSCs', 'text-green-900', 'glow-green')}
           {eintrag.gruppe.map((nsc) => (
             <div key={nsc.id} className="relative border border-green-700 p-3 mb-4 rounded bg-[#111510] shadow">
               <button onClick={() => onNSCEdit(nsc)} className="absolute top-2 right-8 text-sm hover:scale-110">✏️</button>
@@ -104,15 +105,15 @@ const sparkleHeader = (emoji, text, colorClass) => (
                   <h3 className="text-lg font-bold text-yellow-300">{nsc.name}</h3>
                   <p className="italic text-yellow-500">{nsc.rolle}</p>
                   {nsc.created_at && (
-                    <p className="text-xs text-gray-400">📅 Erstes Treffen: {formatDate(nsc.created_at)}</p>
+                    <p className="text-xs text-gray-400 font-sans">📅 Erstes Treffen: {formatDate(nsc.created_at)}</p>
                   )}
                 </div>
               </div>
-              <pre className="mt-2 text-sm whitespace-pre-wrap font-serif">{nsc.info}</pre>
+              <pre className="mt-2 text-sm whitespace-pre-wrap font-sans">{nsc.info}</pre>
             </div>
           ))}
         </div>
-        <div className="w-[420px] h-[20px] bg-[#1a1e24] text-center text-xs text-green-600 font-serif">
+        <div className="w-[420px] h-[20px] bg-[#1a1e24] text-center text-xs text-green-600">
           NSCs
         </div>
         <ImagePreview />

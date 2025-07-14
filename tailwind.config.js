@@ -16,6 +16,15 @@ module.exports = {
         parchment: '#fdf6e3',
         ink: '#1a1a1a',
       },
+      animation: {
+    fadeIn: 'fadeIn 0.6s ease-in forwards',
+        },
+        keyframes: {
+          fadeIn: {
+            '0%': { opacity: 0 },
+            '100%': { opacity: 1 },
+          },
+        },
     },
   },
   plugins: [],

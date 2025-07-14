@@ -11,6 +11,7 @@ import NSCPage from '../components/NSCPage'
 import MapPage from '../components/MapPage'
 import LegendPage from '../components/LegendPage'
 import { deleteChronikEntry, deleteNSCEntry } from '../lib/deleteHelpers'
+import { useRouter } from 'next/navigation';
 
 
 
@@ -39,6 +40,31 @@ export default function Chronik() {
   const [nscs, setNSCs] = useState([])
     const [entryType, setEntryType] = useState('chronik') // Standard: Chronik-Eintrag
     const [selectedNSC, setSelectedNSC] = useState(null)
+
+    //fade in
+     const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const allowed = sessionStorage.getItem('hasAccess');
+    if (!allowed) {
+      router.push('/');
+    } else {
+      setTimeout(() => {
+        setVisible(true); // Startet den Fade-In
+      }, 50); // kleine Verzögerung, damit Animation greift
+    }
+  }, []);
+
+  //   //passwort
+  // const router = useRouter();
+
+  // useEffect(() => {
+  //   const allowed = sessionStorage.getItem('hasAccess');
+  //   if (!allowed) {
+  //     router.push('/');
+  //   }
+  // }, []);
+
 
 
     useEffect(() => {
@@ -246,6 +272,11 @@ const handleDeleteNSC = async (id) => {
 
 
 return (
+<div
+    className={`min-h-screen bg-neutral-900 text-white transition-opacity duration-1000 ease-out ${
+      visible ? 'opacity-100' : 'opacity-0'
+    }`}
+  >
   <>
       <div className="flex justify-center items-center min-h-screen bg-[#1c1b18]">
   <div className="relative w-[900px] bg-[#1c1b18] border border-yellow-700 rounded-lg p-4 shadow-xl">
@@ -298,7 +329,7 @@ return (
           placeholder="🔍 Suche nach Schlagwort, Ort, Kapitel ..."
           value={suchbegriff}
           onChange={(e) => setSuchbegriff(e.target.value)}
-          className="w-[60%] px-4 py-2 rounded-lg border border-yellow-700 bg-[#2d2a24] text-yellow-300/80 placeholder-yellow-500/30 shadow-lg shadow-yellow-900/30 focus:outline-none focus:ring-2 focus:ring-yellow-600 transition duration-300 font-serif"
+          className="w-[60%] px-4 py-2 rounded-lg border border-yellow-700 bg-[#2d2a24] text-yellow-300/80 placeholder-yellow-500/30 shadow-lg shadow-yellow-900/30 focus:outline-none focus:ring-2 focus:ring-yellow-600 transition duration-300"
         />
       </div>
 
@@ -417,5 +448,6 @@ return (
           />
         
   </>
+  </div>
 )
 }
