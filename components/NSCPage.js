@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 export default function NSCPage({ eintrag, onNSCEdit, onNSCDelete }) {
   const [previewUrl, setPreviewUrl] = useState(null)
+  
 
   const formatDate = (dateString) => {
     const date = new Date(dateString)
