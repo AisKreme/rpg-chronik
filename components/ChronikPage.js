@@ -61,7 +61,7 @@ const ChronikPage = React.forwardRef(function ChronikPage(
           ✏️
         </button>
         <button
-          onClick={() => handleEntryDelete(entry.id)}
+          onClick={() => handleEntryDelete(entry)}
           title="Löschen"
           className="hover:scale-110 transition-transform duration-200 text-red-500 text-lg"
         >
@@ -87,11 +87,14 @@ const ChronikPage = React.forwardRef(function ChronikPage(
         </div>
 
         {/* 📖 Klartext */}
-        {visibleFlowIds.includes(entry.id) && (
-          <div className="mt-3 text-black whitespace-pre-wrap text-sm max-h-40 overflow-y-auto pr-1 border border-yellow-700 bg-[#fffaf0] rounded p-2 font-sans">
-            {entry.flow}
-          </div>
-        )}
+        <div
+          className={`mt-3 text-black whitespace-pre-wrap text-sm max-h-40 overflow-y-auto pr-1 border border-yellow-700 bg-[#fffaf0] rounded p-2 font-sans ${
+            visibleFlowIds.includes(entry.id) ? '' : 'hidden'
+          }`}
+          data-flow-hidden
+        >
+          {entry.flow}
+        </div>
 
         {/* 🖼️ Bilder */}
               {entry.images && entry.images.length > 0 && (

@@ -131,15 +131,15 @@ export default function Chronik() {
 
 
 //NEU
-const onDeleteChronikEntry = async (id) => {
-  await deleteChronikEntry(id)
+const onDeleteChronikEntry = async (entry) => {
+  await deleteChronikEntry(entry)
   await fetchEntries()
 }
 
 
   //NEU
-const handleDeleteNSC = async (id) => {
-  await deleteNSCEntry(id)
+const handleDeleteNSC = async (entry) => {
+  await deleteNSCEntry(entry)
   await fetchNSCs()
 }
 
@@ -389,7 +389,8 @@ return (
         <NSCPage
           ref={(el) => el && entry?.id && (pageRefs.current[entry.id] = el)}
           eintrag={entry}
-          onNSCDelete={handleDeleteNSC}
+         // onNSCDelete={handleDeleteNSC}
+          onNSCDelete={(entry) => handleDeleteNSC(entry)}
           onNSCEdit={handleEditNSC}
          
         />
@@ -400,7 +401,7 @@ return (
           idx={idx}
           visibleFlowIds={visibleFlowIds}
           toggleFlow={toggleFlow}
-          handleEntryDelete={onDeleteChronikEntry}
+          handleEntryDelete={(entry) => onDeleteChronikEntry(entry)}
           handleEdit={handleEditChronik}
         />
       )}
