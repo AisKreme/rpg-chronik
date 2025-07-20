@@ -82,7 +82,7 @@ export default function MonsterPage({ eintrag, onMonsterDelete, onMonsterEdit, i
               </div>
             </div>
 
-            <pre className="mt-2 text-sm text-yellow-400 font-mono whitespace-pre-wrap">{eintrag.werte}</pre>
+            <pre className="mt-2 text-sm text-yellow-400 font-sans whitespace-pre-wrap">{eintrag.werte}</pre>
             <pre className="mt-2 text-sm text-yellow-100 font-sans whitespace-pre-wrap max-h-[160px] overflow-y-auto pr-1">
               {eintrag.beschreibung}
             </pre>

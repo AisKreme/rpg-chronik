@@ -32,7 +32,7 @@ export default function Home() {
         router.push('/chronik');
       }, 1000);
     } else {
-      setError('⚡ Falsches Passwort. Du erleidest 1W6 Blitzschaden!');
+      setError('Falsches Passwort. Nichts passiert - noch nicht.');
       setPw('');
     }
   }
@@ -58,19 +58,20 @@ export default function Home() {
             <br />
           </p>
           <input
-            type="password"
-            value={pw}
-            onChange={(e) => setPw(e.target.value)}
-            placeholder="..."
-            className="px-4 py-2 rounded bg-gray-900 border border-gray-600 text-center text-white mb-2 font-sans"
-          />
+          type="password"
+          value={pw}
+          onChange={(e) => setPw(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && checkAccess()}
+          placeholder="..."
+          className="px-4 py-2 rounded bg-gray-900 border border-gray-600 text-center text-white mb-2 font-sans"
+        />
           <button
             onClick={checkAccess}
             className="ml-2 px-4 py-2 bg-purple-700 hover:bg-purple-600 rounded text-white transition shadow-lg"
           >
             🪄 Öffnen
           </button>
-          {error && <p className="mt-4 text-red-400">{error}</p>}
+          {error && <p className="mt-4 text-red-400 font-sans">{error}</p>}
         </div>
       </div>
 

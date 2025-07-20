@@ -285,31 +285,31 @@ function resetFormLocal(newId = null) {
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Notiz (in-character)"
-                className="w-full p-2 rounded border border-yellow-700 text-black"
+                className="w-full p-2 rounded border border-yellow-700 text-black font-sans"
               />
               <textarea
                 value={flow}
                 onChange={(e) => setFlow(e.target.value)}
                 placeholder="Klartext"
-                className="w-full p-2 rounded border border-yellow-700 text-black"
+                className="w-full p-2 rounded border border-yellow-700 text-black font-sans"
               />
               <input
                 value={kapitel}
                 onChange={(e) => setKapitel(e.target.value)}
                 placeholder="Kapitel"
-                className="w-full p-2 rounded border border-yellow-700 text-black"
+                className="w-full p-2 rounded border border-yellow-700 text-black font-sans"
               />
               <input
                 value={ort}
                 onChange={(e) => setOrt(e.target.value)}
                 placeholder="Ort"
-                className="w-full p-2 rounded border border-yellow-700 text-black"
+                className="w-full p-2 rounded border border-yellow-700 text-black font-sans"
               />
               <input
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
                 placeholder="Tags (kommagetrennt)"
-                className="w-full p-2 rounded border border-yellow-700 text-black"
+                className="w-full p-2 rounded border border-yellow-700 text-black font-sans"
               />
 
               {/* 📸 Bild-Upload Chronik */}
@@ -345,20 +345,20 @@ function resetFormLocal(newId = null) {
                 placeholder="Name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full p-2 rounded border border-yellow-700 text-black"
+                className="w-full p-2 rounded border border-yellow-700 text-black font-sans"
               />
               <input
                 type="text"
                 placeholder="Rolle"
                 value={rolle}
                 onChange={(e) => setRolle(e.target.value)}
-                className="w-full p-2 rounded border border-yellow-700 text-black"
+                className="w-full p-2 rounded border border-yellow-700 text-black font-sans"
               />
               <textarea
                 placeholder="Beschreibung"
                 value={info}
                 onChange={(e) => setInfo(e.target.value)}
-                className="w-full p-2 rounded border border-yellow-700 text-black"
+                className="w-full p-2 rounded border border-yellow-700 text-black font-sans"
               />
 
               {/* 📸 Bild-Upload NSC */}
@@ -393,26 +393,26 @@ function resetFormLocal(newId = null) {
                 placeholder="Name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full p-2 rounded border border-yellow-700 text-black"
+                className="w-full p-2 rounded border border-yellow-700 text-black font-sans"
               />
               <textarea
                 placeholder="Beschreibung"
                 value={info}
                 onChange={(e) => setInfo(e.target.value)}
-                className="w-full p-2 rounded border border-yellow-700 text-black"
+                className="w-full p-2 rounded border border-yellow-700 text-black font-sans"
               />
               <textarea
                 placeholder="Werte"
                 value={werte}
                 onChange={(e) => setWerte(e.target.value)}
-                className="w-full p-2 rounded border border-yellow-700 text-black"
+                className="w-full p-2 rounded border border-yellow-700 text-black font-sans"
               />
               <input
                 type="text"
                 placeholder="Ort"
                 value={monsterOrt}
                 onChange={(e) => setMonsterOrt(e.target.value)}
-                className="w-full p-2 rounded border border-yellow-700 text-black"
+                className="w-full p-2 rounded border border-yellow-700 text-black font-sans"
               />
 
               <ImageUploader

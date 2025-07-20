@@ -427,7 +427,7 @@ return (
           placeholder="🔍 Suche nach Schlagwort, Ort, Kapitel ..."
           value={suchbegriff}
           onChange={(e) => setSuchbegriff(e.target.value)}
-          className="w-[60%] px-4 py-2 rounded-lg border border-yellow-700 bg-[#2d2a24] text-yellow-300/80 placeholder-yellow-500/30 shadow-lg shadow-yellow-900/30 focus:outline-none focus:ring-2 focus:ring-yellow-600 transition duration-300"
+          className="w-[60%] px-4 py-2 rounded-lg border border-yellow-700 bg-[#2d2a24] text-yellow-300/80 placeholder-yellow-500/30 shadow-lg shadow-yellow-900/30 focus:outline-none focus:ring-2 focus:ring-yellow-600 transition duration-300 font-sans"
         />
       </div>
 
