@@ -150,7 +150,7 @@ display: flex;
 }
 
 .bookmark:hover {
-  transform: translateZ(-10px) translateX(-60px);
+  transform: translateZ(-10px) translateX(-65px);
 }
 
 /* 🔖 Rechte Bookmarks */
@@ -162,16 +162,17 @@ display: flex;
 }
 
 .bookmark-right:hover {
-  transform: translateZ(-10px) translateX(60px);
+  transform: translateZ(-10px) translateX(65px);
 }
 
 /* 🔖 Farbvarianten */
 .bookmark-1 { background: linear-gradient(to right, #facc15, #b45309); } /* Gelb/Orange */
-.bookmark-2 { background: linear-gradient(to right, #f87171, #b91c1c); } /* Rot/Dunkelrot */
+.bookmark-2 { background: linear-gradient(to right, #fbbf24, #92400e); } /* Bernstein/Goldbraun */
 .bookmark-3 { background: linear-gradient(to right, #60a5fa, #1e3a8a); } /* Blau */
 .bookmark-4 { background: linear-gradient(to right, #4ade80, #15803d); } /* Grün */
 .bookmark-5 { background: linear-gradient(to right, #a78bfa, #6d28d9); } /* Lila/Violett */
-.bookmark-6 { background: linear-gradient(to right, #f472b6, #9d174d); } /* Pink/Violett */
+.bookmark-6 { background: linear-gradient(to right, #f87171, #b91c1c); } /* Rot/Dunkelrot */
+.bookmark-7 { background: linear-gradient(to right, #f472b6, #9d174d); } /* Pink/Violett */
 
 
 

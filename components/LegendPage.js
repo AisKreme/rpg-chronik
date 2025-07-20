@@ -65,10 +65,9 @@ export default function LegendPage({
           bucket="maps"
           initialImages={images}
           onUploadComplete={(newImages) => {
-            // Verhindere doppelte Bilder
             const combined = [...new Set([...images, ...newImages])]
             setImages(combined)
-}}
+          }}
         />
 
         <button

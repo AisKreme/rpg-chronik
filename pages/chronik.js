@@ -30,6 +30,7 @@ export default function Chronik() {
   const [initialKapitel, setInitialKapitel] = useState('')
   const pageRefs = useRef({}) // z. B. { [entry.id]: HTMLElement }
   const [images, setImages] = useState([])
+  const [maps, setMaps] = useState([])
 
   // 🔍 Gefilterte Einträge (Suche)
   const gefilterteEintraege = entries.filter(entry => {
@@ -55,22 +56,31 @@ export default function Chronik() {
     }
   }, []);
 
-  //   //passwort
-  // const router = useRouter();
 
-  // useEffect(() => {
-  //   const allowed = sessionStorage.getItem('hasAccess');
-  //   if (!allowed) {
-  //     router.push('/');
-  //   }
-  // }, []);
+  
 
 
+      async function fetchMaps() {
+        const { data, error } = await supabase
+          .from('maps')
+          .select('*')
+          .order('id', { ascending: true })
 
-    useEffect(() => {
-      fetchEntries()
-      fetchNSCs()
-    }, [])
+        if (!error) setMaps(data)
+      }
+
+      useEffect(() => {
+        fetchEntries()
+        fetchNSCs()
+        fetchMaps()
+      }, [])
+
+
+
+    // useEffect(() => {
+    //   fetchEntries()
+    //   fetchNSCs()
+    // }, [])
 
 
     useEffect(() => {
@@ -217,11 +227,23 @@ const handleDeleteNSC = async (entry) => {
           gruppe
         })))
 
-        const ersteMapSeite = pages.length
-      // ➤ Map-Doppelseite vorbereiten
-          pages.push( { typ: 'map-left', mapType: 'world' })
-           pages.push( { typ: 'map-legend', mapType: 'world' })
-       // pages.push({ id: 'map-3', typ: 'map', note: '🗺 Karte 3' })
+        // 🧱 Stelle sicher, dass MapPage auf einer linken Seite (ungerader Index) beginnt
+        if (pages.length % 2 === 0) {
+          // wir stehen auf rechter Seite → Leerseite einfügen, um maps links zu starten
+          pages.push(null)
+        }
+
+      // 🗺 Jetzt beginnt die MapPage auf einer linken Seite
+      const ersteMapSeite = pages.length
+
+        maps.forEach((map) => {
+          pages.push({ typ: 'map-left', map })       // linke Seite = Karte
+          pages.push({ typ: 'map-legend', map })     // rechte Seite = Legende
+        })
+
+        pages.push({ typ: 'map-left', map: null })
+        pages.push({ typ: 'map-legend', map: null })
+
 
         // ➤ Ggf. Leerseite einfügen, damit Timeline auf linker Seite erscheint
         const totalWithoutTimeline = pages.length
@@ -232,6 +254,8 @@ const handleDeleteNSC = async (entry) => {
         pages.push({ id: 'timeline', note: '📅 Timeline', flow: '', ort: '', kapitel: '', tags: [] })
 
 /* --- Bookmarks + Helper --- */
+
+        const ersteMonsterSeite = pages.findIndex(p => p?.typ === 'monster-page')
 
         const letzteSeite = pages.length - 1 // Timeline ist letzte Seite
         const letzteChronikSeite = pages.findIndex(p => p?.id === entries.at(-1)?.id)
@@ -270,6 +294,17 @@ const handleDeleteNSC = async (entry) => {
   }
 
 
+        function getBookmarkStufe(seite) {
+      const typ = pages[seite]?.typ
+      if (seite === 0) return -1 // Inhaltsverzeichnis → Spezialfall: alles rechts
+      if (typ === 'chronik') return 1
+      if (typ === 'sc') return 2
+      if (typ === 'nsc') return 3
+      if (typ?.startsWith('map')) return 4
+      if (typ?.startsWith('monster')) return 5
+      if (typ === undefined && seite === letzteSeite) return 6 // Timeline
+      return 1
+    }
 
 return (
 <div
@@ -280,46 +315,83 @@ return (
   <>
       <div className="flex justify-center items-center min-h-screen bg-[#1c1b18]">
   <div className="relative w-[900px] bg-[#1c1b18] border border-yellow-700 rounded-lg p-4 shadow-xl">
-          {/* 📖 Linke oder Rechte Bookmarks je nach Seite */}
-            {/* 🔖 Inhaltsseite: Alle rechts */}
-{aktiveSeite === 0 && (
-  <div className="absolute right-0 top-0 flex flex-col items-end pointer-events-none">
-    <div className="absolute top-[120px] pr-[0.6rem] bookmark-right bookmark-1 pointer-events-auto" onClick={() => geheZuSeite(0)}>Inhalt 🧾</div>
-    <div className="absolute top-[200px] pr-[0.6rem] bookmark-right bookmark-2 pointer-events-auto" onClick={() => geheZuSeite(letzteChronikSeite)}>Chronik 📚</div>
-    <div className="absolute top-[280px] pr-[0.6rem] bookmark-right bookmark-3 pointer-events-auto" onClick={() => geheZuSeite(ersteSCSeite)}>SCs 🧙</div>
-    <div className="absolute top-[360px] pr-[0.6rem] bookmark-right bookmark-4 pointer-events-auto" onClick={() => geheZuSeite(ersteNSCSeite)}>NSCs 🧌</div>
-    <div className="absolute top-[440px] pr-[0.6rem] bookmark-right bookmark-5 pointer-events-auto" onClick={() => geheZuSeite(ersteMapSeite)}>Maps 🗺</div>
-    <div className="absolute top-[520px] pr-[0.6rem] bookmark-right bookmark-6 pointer-events-auto" onClick={() => geheZuSeite(letzteSeite)}>Timeline ⏳</div>
-  </div>
-)}
 
-{/* 🔖 Timeline-Seite: Alle links */}
-{aktiveSeite === letzteSeite && (
-  <div className="absolute left-0 top-0 flex flex-col items-start pointer-events-none">
-    <div className="absolute top-[120px] pl-[0.6rem] bookmark bookmark-1 pointer-events-auto" onClick={() => geheZuSeite(0)}>🧾 Inhalt</div>
-    <div className="absolute top-[200px] pl-[0.6rem] bookmark bookmark-2 pointer-events-auto" onClick={() => geheZuSeite(letzteChronikSeite)}>📚 Chronik</div>
-    <div className="absolute top-[280px] pl-[0.6rem] bookmark bookmark-3 pointer-events-auto" onClick={() => geheZuSeite(ersteSCSeite)}>🧙 SCs</div>
-    <div className="absolute top-[360px] pl-[0.6rem] bookmark bookmark-4 pointer-events-auto" onClick={() => geheZuSeite(ersteNSCSeite)}>🧌 NSCs</div>
-    <div className="absolute top-[440px] pl-[0.6rem] bookmark bookmark-5 pointer-events-auto" onClick={() => geheZuSeite(ersteMapSeite)}>🗺 Maps</div>
-    <div className="absolute top-[520px] pl-[0.6rem] bookmark bookmark-6 pointer-events-auto" onClick={() => geheZuSeite(letzteSeite)}>⏳ Timeline</div>
-  </div>
-)}
+{(() => {
+  const stufe = getBookmarkStufe(aktiveSeite)
 
-{/* 🔖 Alle anderen Seiten (Chronik) → 2 links, 2 rechts */}
-{aktiveSeite !== 0 && aktiveSeite !== letzteSeite && (
-  <>
-    <div className="absolute left-0 top-0 flex flex-col items-start pointer-events-none">
-      <div className="absolute top-[120px] pl-[0.6rem] bookmark bookmark-1 pointer-events-auto" onClick={() => geheZuSeite(0)}>🧾 Inhalt</div>
-      <div className="absolute top-[200px] pl-[0.6rem] bookmark bookmark-2 pointer-events-auto" onClick={() => geheZuSeite(letzteChronikSeite)}>📚 Chronik</div>
-      <div className="absolute top-[280px] pl-[0.6rem] bookmark bookmark-3 pointer-events-auto" onClick={() => geheZuSeite(ersteSCSeite)}>🧙 SCs</div>
-    </div>
-    <div className="absolute right-0 top-0 flex flex-col items-end pointer-events-none">
-      <div className="absolute top-[360px] pr-[0.6rem] bookmark-right bookmark-4 pointer-events-auto" onClick={() => geheZuSeite(ersteNSCSeite)}>NSCs 🧌</div>
-      <div className="absolute top-[440px] pr-[0.6rem] bookmark-right bookmark-5 pointer-events-auto" onClick={() => geheZuSeite(ersteMapSeite)}>Maps 🗺</div>
-      <div className="absolute top-[520px] pr-[0.6rem] bookmark-right bookmark-6 pointer-events-auto" onClick={() => geheZuSeite(letzteSeite)}>Timeline ⏳</div>
-    </div>
-  </>
-)}
+  if (stufe === -1) {
+    // Inhaltsverzeichnis: alles rechts
+    return (
+      <div className="absolute right-0 top-0 flex flex-col items-end pointer-events-none">
+        <div className="absolute top-[90px] pr-[0.6rem] bookmark-right pointer-events-auto bookmark-1" onClick={() => geheZuSeite(0)}>Inhalt&nbsp; 🧾</div>
+        <div className="absolute top-[170px] pr-[0.6rem] bookmark-right pointer-events-auto bookmark-2" onClick={() => geheZuSeite(letzteChronikSeite)}>Chronik&nbsp; 📚</div>
+        <div className="absolute top-[250px] pr-[0.6rem] bookmark-right pointer-events-auto bookmark-3" onClick={() => geheZuSeite(ersteSCSeite)}>SCs&nbsp; 🧙</div>
+        <div className="absolute top-[330px] pr-[0.6rem] bookmark-right pointer-events-auto bookmark-4" onClick={() => geheZuSeite(ersteNSCSeite)}>NSCs&nbsp; 🧌</div>
+        <div className="absolute top-[410px] pr-[0.6rem] bookmark-right pointer-events-auto bookmark-5" onClick={() => geheZuSeite(ersteMapSeite)}>Maps&nbsp; 🗺</div>
+        <div className="absolute top-[490px] pr-[0.6rem] bookmark-right pointer-events-auto bookmark-6" onClick={() => geheZuSeite(ersteMonsterSeite)}>Monster&nbsp; 👹</div>
+        <div className="absolute top-[570px] pr-[0.6rem] bookmark-right pointer-events-auto bookmark-7" onClick={() => geheZuSeite(letzteSeite)}>Timeline&nbsp; ⏳</div>
+      </div>
+    )
+  }
+
+  if (stufe === 6) {
+    // Timeline: alles links
+    return (
+      <div className="absolute left-0 top-0 flex flex-col items-start pointer-events-none">
+        <div className="absolute top-[90px] pl-[0.6rem] bookmark pointer-events-auto bookmark-1" onClick={() => geheZuSeite(0)}>🧾&nbsp; Inhalt</div>
+        <div className="absolute top-[170px] pl-[0.6rem] bookmark pointer-events-auto bookmark-2" onClick={() => geheZuSeite(letzteChronikSeite)}>📚&nbsp; Chronik</div>
+        <div className="absolute top-[250px] pl-[0.6rem] bookmark pointer-events-auto bookmark-3" onClick={() => geheZuSeite(ersteSCSeite)}>🧙&nbsp; SCs</div>
+        <div className="absolute top-[330px] pl-[0.6rem] bookmark pointer-events-auto bookmark-4" onClick={() => geheZuSeite(ersteNSCSeite)}>🧌&nbsp; NSCs</div>
+        <div className="absolute top-[410px] pl-[0.6rem] bookmark pointer-events-auto bookmark-5" onClick={() => geheZuSeite(ersteMapSeite)}>🗺&nbsp; Maps</div>
+        <div className="absolute top-[490px] pl-[0.6rem] bookmark pointer-events-auto bookmark-6" onClick={() => geheZuSeite(ersteMonsterSeite)}>👹&nbsp; Monster</div>
+        <div className="absolute top-[570px] pl-[0.6rem] bookmark pointer-events-auto bookmark-7" onClick={() => geheZuSeite(letzteSeite)}>⏳&nbsp; Timeline</div>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      <div className="absolute left-0 top-0 flex flex-col items-start pointer-events-none">
+        {stufe >= 1 && (
+          <div className="absolute top-[90px] pl-[0.6rem] bookmark pointer-events-auto bookmark-1" onClick={() => geheZuSeite(0)}>🧾&nbsp; Inhalt</div>
+        )}
+        {stufe >= 1 && (
+          <div className="absolute top-[170px] pl-[0.6rem] bookmark pointer-events-auto bookmark-2" onClick={() => geheZuSeite(letzteChronikSeite)}>📚&nbsp; Chronik</div>
+        )}
+        {stufe >= 2 && (
+          <div className="absolute top-[250px] pl-[0.6rem] bookmark pointer-events-auto bookmark-3" onClick={() => geheZuSeite(ersteSCSeite)}>🧙&nbsp; SCs</div>
+        )}
+        {stufe >= 3 && (
+          <div className="absolute top-[330px] pl-[0.6rem] bookmark pointer-events-auto bookmark-4" onClick={() => geheZuSeite(ersteNSCSeite)}>🧌&nbsp; NSCs</div>
+        )}
+        {stufe >= 4 && (
+          <div className="absolute top-[410px] pl-[0.6rem] bookmark pointer-events-auto bookmark-5" onClick={() => geheZuSeite(ersteMapSeite)}>🗺&nbsp; Maps</div>
+        )}
+        {stufe >= 5 && (
+          <div className="absolute top-[490px] pl-[0.6rem] bookmark pointer-events-auto bookmark-6" onClick={() => geheZuSeite(ersteMonsterSeite)}>👹&nbsp; Monster</div>
+        )}
+      </div>
+
+      <div className="absolute right-0 top-0 flex flex-col items-end pointer-events-none">
+        {stufe < 2 && (
+          <div className="absolute top-[250px] pr-[0.6rem] bookmark-right pointer-events-auto bookmark-3" onClick={() => geheZuSeite(ersteSCSeite)}>SCs&nbsp; 🧙</div>
+        )}
+        {stufe < 3 && (
+          <div className="absolute top-[330px] pr-[0.6rem] bookmark-right pointer-events-auto bookmark-4" onClick={() => geheZuSeite(ersteNSCSeite)}>NSCs&nbsp; 🧌</div>
+        )}
+        {stufe < 4 && (
+          <div className="absolute top-[410px] pr-[0.6rem] bookmark-right pointer-events-auto bookmark-5" onClick={() => geheZuSeite(ersteMapSeite)}>Maps&nbsp; 🗺</div>
+        )}
+        {stufe < 5 && (
+          <div className="absolute top-[490px] pr-[0.6rem] bookmark-right pointer-events-auto bookmark-6" onClick={() => geheZuSeite(ersteMonsterSeite)}>Monster&nbsp; 👹</div>
+        )}
+        {stufe < 6 && (
+          <div className="absolute top-[570px] pr-[0.6rem] bookmark-right pointer-events-auto bookmark-7" onClick={() => geheZuSeite(letzteSeite)}>Timeline&nbsp; ⏳</div>
+        )}
+      </div>
+    </>
+  )
+})()}
 
 
       {/* 🔍 Suchleiste über dem Buch */}
@@ -355,18 +427,27 @@ return (
  {pages.map((entry, idx) => {
 
 
-      // if (entry.typ === 'map') {
-      //     return (
-      //       <>
-      //         <div key={`${idx}-karte`} className="page">
-      //           <MapPage mapId={entry.mapId} />
-      //         </div>
-      //         <div key={`${idx}-legende`} className="page">
-      //           <LegendPage mapId={entry.mapId} />
-      //         </div>
-      //       </>
-      //     )
-      //   }
+          if (entry?.typ === 'map-left') {
+            return (
+              <div key={idx} className="page">
+                <MapPage map={entry.map ?? null} />
+              </div>
+            )
+          }
+
+          if (entry?.typ === 'map-legend') {
+            return (
+              <div key={idx} className="page">
+                <LegendPage
+                  mapType="Neu"
+                  title={entry.map?.title ?? ''}
+                  description={entry.map?.beschreibung ?? ''}
+                  images={entry.map?.images ?? []}
+                  editMapId={entry.map?.id ?? null}
+                />
+              </div>
+            )
+          }
 
 
 

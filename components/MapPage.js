@@ -1,84 +1,64 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 import Marker from './Marker'
-import MarkerDialog from './MarkerDialog'
-import { fetchMarkers, saveMarker } from '../lib/mapHelpers'
-import { supabase, supabaseUrl } from '../lib/supabaseClient'
+import { fetchMarkers } from '../lib/mapHelpers'
+import { supabase } from '../lib/supabaseClient'
 
-export default function MapPage({ mapId }) {
+export default function MapPage({ map }) {
   const [markers, setMarkers] = useState([])
-  const [selectedPos, setSelectedPos] = useState(null)
   const [selectedMarker, setSelectedMarker] = useState(null)
+  const transformRef = useRef(null)
 
-  // 🧭 Marker laden
   useEffect(() => {
+    if (!map?.id) return
     async function loadMarkers() {
-      const data = await fetchMarkers(mapId)
-      setMarkers(data)
+      const data = await fetchMarkers(map.id)
+      setMarkers(data || [])
     }
     loadMarkers()
-  }, [mapId])
+  }, [map])
 
-  // 📍 Klick auf Karte → Marker setzen
-  const handleMapClick = (e, bounds) => {
-    const { left, top, width, height } = bounds
-    const x = (e.clientX - left) / width
-    const y = (e.clientY - top) / height
-    setSelectedPos({ x, y })
-    setSelectedMarker(null)
+  if (!map || !map.images || map.images.length === 0) {
+    return (
+      <div className="flex items-center justify-center w-full h-full bg-[#1c1b18] text-yellow-300 text-center">
+        🗺 Keine Karte vorhanden
+      </div>
+    )
   }
 
-  // 💾 Marker speichern
-  const handleSave = async (data) => {
-    const newMarker = await saveMarker({ ...data, map_id: mapId })
-    setMarkers((prev) => [...prev, newMarker])
-    setSelectedPos(null)
-  }
-
-  const imageUrl = `${supabaseUrl}/storage/v1/object/public/maps/${mapId}/map.jpg`
+  const imageUrl = map.images[0]
 
   return (
-    <div className="relative w-full h-full">
-      <TransformWrapper>
-        <TransformComponent>
-          <div
-            className="relative w-full h-full"
-            onClick={(e) => {
-              const bounds = e.currentTarget.getBoundingClientRect()
-              handleMapClick(e, bounds)
-            }}
-          >
-            <img
-              src={imageUrl}
-              alt="Karte"
-              className="w-full h-full object-cover select-none"
-              draggable={false}
-            />
+    <div className="relative w-full h-full overflow-hidden">
+      <TransformWrapper
+        initialScale={1.5}
+        minScale={0.5}
+        maxScale={5}
+        centerOnInit
+        limitToBounds={false}
+        ref={transformRef}
+      >
+        {({ zoomIn, zoomOut, resetTransform }) => (
+          <>
+            <TransformComponent wrapperClass="w-full h-full">
+              <div className="w-full h-full flex items-center justify-center bg-[#1c1b18]">
+                <img
+                  src={imageUrl}
+                  alt={map.title}
+                  className="max-w-none w-full h-full object-cover select-none"
+                  draggable={false}
+                />
+              </div>
+            </TransformComponent>
 
-            {markers.map((m) => (
-              <Marker
-                key={m.id}
-                x={m.x}
-                y={m.y}
-                label={m.label}
-                onClick={() => setSelectedMarker(m)}
-              />
-            ))}
-          </div>
-        </TransformComponent>
+            <div className="absolute top-2 right-2 z-50 flex gap-2">
+              <button className="bg-yellow-800 p-2 rounded" onClick={zoomIn}>+</button>
+              <button className="bg-yellow-800 p-2 rounded" onClick={zoomOut}>−</button>
+              <button className="bg-yellow-800 p-2 rounded" onClick={resetTransform}>⟳</button>
+            </div>
+          </>
+        )}
       </TransformWrapper>
-
-      {(selectedPos || selectedMarker) && (
-        <MarkerDialog
-          pos={selectedPos}
-          marker={selectedMarker}
-          onClose={() => {
-            setSelectedPos(null)
-            setSelectedMarker(null)
-          }}
-          onSave={handleSave}
-        />
-      )}
     </div>
   )
 }
