@@ -99,7 +99,7 @@ const sparkleHeader = (emoji, text, colorClass, glowColor) => (
           {eintrag.gruppe.map((nsc) => (
             <div key={nsc.id} className="relative border border-green-700 p-3 mb-4 rounded bg-[#111510] shadow"  data-entry-id={`nsc-${nsc.id}`}>
               <button onClick={() => onNSCEdit(nsc)} className="absolute top-2 right-8 text-sm hover:scale-110">✏️</button>
-              <button onClick={() => onNSCDelete(nsc.id)} className="absolute top-2 right-2 text-sm hover:scale-110">🗑️</button>
+              <button onClick={() => onNSCDelete(nsc)} className="absolute top-2 right-2 text-sm hover:scale-110">🗑️</button>
               <div className="flex items-start gap-4 mb-2">
                 {nsc.images?.[0] && <ProfileImage url={nsc.images[0]} />}
                 <div>
