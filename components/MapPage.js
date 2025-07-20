@@ -1,8 +1,7 @@
-import React, { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 import Marker from './Marker'
 import { fetchMarkers } from '../lib/mapHelpers'
-import { supabase } from '../lib/supabaseClient'
 
 export default function MapPage({ map }) {
   const [markers, setMarkers] = useState([])

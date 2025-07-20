@@ -1,6 +1,3 @@
-import { supabase } from '../lib/supabaseClient'
-import ImageUploader from './ImageUploader'
-import NoFlip from './NoFlip'
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -12,24 +9,7 @@ const ChronikPage = React.forwardRef(function ChronikPage(
     toggleFlow,
     handleEdit,
     handleEntryDelete,
-    note,
-    flow,
-    kapitel,
-    ort,
-    tags,
-    setNote,
-    setFlow,
-    setKapitel,
-    setOrt,
-    setTags,
-    handleSubmit,
-    editId,
-    resetForm,
     className = '',
-    isForm,
-    images,
-    setImages,
-    onClose,
   },
   ref
 ) {

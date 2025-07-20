@@ -1,15 +1,12 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import ImageUploader from './ImageUploader'
-import { supabase, supabaseUrl } from '../lib/supabaseClient'
 import { saveChronikEntry, saveNSCEntry } from '../lib/saveHelpers'
 
 
 export default function EntryPopup({
   show,
   onClose,
-  visibleFlowIds,
-  toggleFlow,
   entries,
   scrollToEntry,
   entryType,
@@ -21,6 +18,7 @@ export default function EntryPopup({
   editId,
   editNSCId,
   refreshEntries,
+  selectedMonster,
 }) {
 
 //NEU
@@ -34,37 +32,54 @@ const [name, setName] = useState('')
 const [rolle, setRolle] = useState('')
 const [info, setInfo] = useState('')
 
+const [werte, setWerte] = useState('')
+const [monsterOrt, setMonsterOrt] = useState('')
 
 const [images, setImages] = useState([])
 
 //NEU 
 const isEditModeChronik = entryType === 'chronik' && !!editId
 const isEditModeNSC = entryType === 'nsc' && !!editNSCId
-const isEditMode = isEditModeChronik || isEditModeNSC
+const isEditModeMonster = entryType === 'monster' && !!selectedMonster
+const isEditMode = isEditModeChronik || isEditModeNSC || isEditModeMonster
 
 
 useEffect(() => {
-    if (entryType === 'chronik' && editId) {
-      const eintrag = entries.find((e) => e.id === editId)
-      if (eintrag) {
-        setNote(eintrag.note || '')
-        setFlow(eintrag.flow || '')
-        setKapitel(eintrag.kapitel || '')
-        setOrt(eintrag.ort || '')
-        setTags(eintrag.tags?.join(', ') || '')
-        setImages(eintrag.images || [])
-      }
+  // 📝 Chronik-Eintrag bearbeiten
+  if (entryType === 'chronik' && editId) {
+    const eintrag = entries.find((e) => e.id === editId)
+    if (eintrag) {
+      setNote(eintrag.note || '')
+      setFlow(eintrag.flow || '')
+      setKapitel(eintrag.kapitel || '')
+      setOrt(eintrag.ort || '')
+      setTags(eintrag.tags?.join(', ') || '')
+      setImages(eintrag.images || [])
     }
-    if (entryType === 'nsc' && selectedNSC) {
-      setName(selectedNSC.name || '')
-      setRolle(selectedNSC.rolle || '')
-      setInfo(selectedNSC.info || '')
-      setImages(selectedNSC.images || [])
-    }
-    if (entryType === 'chronik' && !editId && initialKapitel) {
-      setKapitel(initialKapitel)
-    }
-  }, [entryType, editId, selectedNSC, entries, initialKapitel])
+  }
+
+  // 🧙 NSC bearbeiten
+  else if (entryType === 'nsc' && selectedNSC) {
+    setName(selectedNSC.name || '')
+    setRolle(selectedNSC.rolle || '')
+    setInfo(selectedNSC.info || '')
+    setImages(selectedNSC.images || [])
+  }
+
+  // 🐲 Monster bearbeiten
+  else if (entryType === 'monster' && selectedMonster) {
+    setName(selectedMonster.name || '')
+    setInfo(selectedMonster.beschreibung || '')
+    setWerte(selectedMonster.werte || '')
+    setMonsterOrt(selectedMonster.ort || '')
+    setImages(selectedMonster.images || [])
+  }
+
+  // 📘 Standardkapitel setzen bei neuem Chronik-Eintrag
+  if (entryType === 'chronik' && !editId && initialKapitel) {
+    setKapitel(initialKapitel)
+  }
+}, [entryType, editId, selectedNSC, selectedMonster, entries, initialKapitel])
 
 
 // 🗂 Welche Buckets für welchen Typ?
@@ -72,7 +87,7 @@ const bucketMap = {
   chronik: 'chronik-images',
   nsc: 'npcs',
   map: 'maps',
-  monster: 'monster'
+  monster: 'monsters'
 }
 
 // 🔁 Aktuellen Bucket auswählen
@@ -84,35 +99,46 @@ const resolvedEntryId =
     : editId?.toString() || 'temp'
 
 
+useEffect(() => {
+  if (!show) return
 
- 
-        useEffect(() => {
-          if (!show) return
-
-          if (isEditModeChronik) {
-            const eintrag = entries.find((e) => e.id === editId)
-            if (eintrag) {
-              setNote(eintrag.note || '')
-              setFlow(eintrag.flow || '')
-              setKapitel(eintrag.kapitel || '')
-              setOrt(eintrag.ort || '')
-              setTags(eintrag.tags?.join(', ') || '')
-              setImages(eintrag.images || [])
-            }
-          } else if (isEditModeNSC && selectedNSC) {
-            setName(selectedNSC.name || '')
-            setRolle(selectedNSC.rolle || '')
-            setInfo(selectedNSC.info || '')
-            setImages(selectedNSC.images || [])
-          } else {
-            resetFormLocal()
-            if (entryType === 'chronik' && initialKapitel) {
-              setKapitel(initialKapitel)
-            }
-          }
-        }, [show, entryType, editId, editNSCId, selectedNSC, entries, initialKapitel])
-    
-
+  if (isEditModeChronik) {
+    const eintrag = entries.find((e) => e.id === editId)
+    if (eintrag) {
+      setNote(eintrag.note || '')
+      setFlow(eintrag.flow || '')
+      setKapitel(eintrag.kapitel || '')
+      setOrt(eintrag.ort || '')
+      setTags(eintrag.tags?.join(', ') || '')
+      setImages(eintrag.images || [])
+    }
+  } else if (isEditModeNSC && selectedNSC) {
+    setName(selectedNSC.name || '')
+    setRolle(selectedNSC.rolle || '')
+    setInfo(selectedNSC.info || '')
+    setImages(selectedNSC.images || [])
+  } else if (entryType === 'monster' && selectedMonster) {
+    setName(selectedMonster.name || '')
+    setInfo(selectedMonster.beschreibung || '')
+    setWerte(selectedMonster.werte || '')
+    setMonsterOrt(selectedMonster.ort || '')
+    setImages(selectedMonster.images || [])
+  } else {
+    resetFormLocal()
+    if (entryType === 'chronik' && initialKapitel) {
+      setKapitel(initialKapitel)
+    }
+  }
+}, [
+  show,
+  entryType,
+  editId,
+  editNSCId,
+  selectedNSC,
+  selectedMonster,
+  entries,
+  initialKapitel,
+])
 
 const handleSave = async (e) => {
     e?.preventDefault()
@@ -127,7 +153,17 @@ const handleSave = async (e) => {
       newId = await saveChronikEntry({ note, flow, kapitel, ort, tags, images, editId })
     } else if (entryType === 'nsc') {
       newId = await saveNSCEntry({ name, rolle, info, images, editNSCId })
-    }
+    } else if (entryType === 'monster') {
+        const { saveMonsterEntry } = await import('../lib/saveHelpers')
+        newId = await saveMonsterEntry({
+          name,
+          beschreibung: info,
+          werte,
+          images,
+          ort: monsterOrt,
+          editMonsterId: selectedMonster?.id 
+        })
+      }
 
     if (!isEditModeChronik && !isEditModeNSC && newId) {
       scrollToEntry?.(newId)
@@ -158,6 +194,10 @@ function resetFormLocal(newId = null) {
   setName('')
   setRolle('')
   setInfo('')
+
+  // Monster-Felder
+  setWerte('')
+  setMonsterOrt('')
 
   // Allgemeines
   setImages([])
@@ -223,7 +263,19 @@ function resetFormLocal(newId = null) {
               >
                 🧙 NSC
               </button>
+              <button
+                type="button"
+                onClick={() => handleTypeChange('monster')}
+                className={`px-3 py-1 rounded ${
+                  entryType === 'monster'
+                    ? 'bg-yellow-700 text-parchment'
+                    : 'bg-[#3a362e] text-yellow-300 hover:bg-[#4a453c]'
+                }`}
+              >
+                👹 Monster
+              </button>
             </div>
+            
           )}
 
           {/* 📖 Chronik-Formular */}
@@ -285,7 +337,7 @@ function resetFormLocal(newId = null) {
                 </button>
               </div>
             </form>
-          ) : (
+          ) : entryType === 'nsc' ? (
             /* 👤 NSC-Formular */
             <form onSubmit={handleSave} className="space-y-3">
               <input
@@ -320,6 +372,59 @@ function resetFormLocal(newId = null) {
               <div className="flex gap-2">
                 <button type="submit" className="magical-btn bg-green-900 hover:bg-green-800 w-full">
                   {isEditModeNSC ? '💾 NSC aktualisieren' : '➕ NSC speichern'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetFormLocal()
+                    onClose()
+                  }}
+                  className="border px-4 py-1 text-gray-700 rounded bg-white"
+                >
+                  Abbrechen
+                </button>
+              </div>
+            </form>
+          ) : (
+            /* 👹 Monster-Formular */
+            <form onSubmit={handleSave} className="space-y-3">
+              <input
+                type="text"
+                placeholder="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full p-2 rounded border border-yellow-700 text-black"
+              />
+              <textarea
+                placeholder="Beschreibung"
+                value={info}
+                onChange={(e) => setInfo(e.target.value)}
+                className="w-full p-2 rounded border border-yellow-700 text-black"
+              />
+              <textarea
+                placeholder="Werte"
+                value={werte}
+                onChange={(e) => setWerte(e.target.value)}
+                className="w-full p-2 rounded border border-yellow-700 text-black"
+              />
+              <input
+                type="text"
+                placeholder="Ort"
+                value={monsterOrt}
+                onChange={(e) => setMonsterOrt(e.target.value)}
+                className="w-full p-2 rounded border border-yellow-700 text-black"
+              />
+
+              <ImageUploader
+                entryId={resolvedEntryId}
+                bucket={selectedBucket}
+                initialImages={images}
+                onUploadComplete={setImages}
+              />
+
+              <div className="flex gap-2">
+                <button type="submit" className="magical-btn bg-green-900 hover:bg-green-800 w-full">
+                  {isEditModeMonster ? '💾 Monster aktualisieren' : '➕ Monster speichern'}
                 </button>
                 <button
                   type="button"

@@ -10,9 +10,8 @@ import TimelinePage from '../components/TimelinePage'
 import NSCPage from '../components/NSCPage'
 import MapPage from '../components/MapPage'
 import LegendPage from '../components/LegendPage'
-import { deleteChronikEntry, deleteNSCEntry } from '../lib/deleteHelpers'
-import { useRouter } from 'next/navigation';
-
+import { deleteChronikEntry, deleteNSCEntry, deleteMonsterEntry } from '../lib/deleteHelpers'
+import MonsterPage from '../components/MonsterPage'
 
 
 
@@ -42,6 +41,11 @@ export default function Chronik() {
     const [entryType, setEntryType] = useState('chronik') // Standard: Chronik-Eintrag
     const [selectedNSC, setSelectedNSC] = useState(null)
 
+
+  const [monster, setMonster] = useState([])
+  const [selectedMonster, setSelectedMonster] = useState(null)
+
+
     //fade in
      const [visible, setVisible] = useState(false);
 
@@ -57,7 +61,13 @@ export default function Chronik() {
   }, []);
 
 
-  
+async function fetchMonsters() {
+  const { data, error } = await supabase
+    .from('monsters')
+    .select('*')
+    .order('id', { ascending: true })
+  if (!error) setMonster(data)
+}
 
 
       async function fetchMaps() {
@@ -73,15 +83,8 @@ export default function Chronik() {
         fetchEntries()
         fetchNSCs()
         fetchMaps()
+        fetchMonsters()
       }, [])
-
-
-
-    // useEffect(() => {
-    //   fetchEntries()
-    //   fetchNSCs()
-    // }, [])
-
 
     useEffect(() => {
       function handleKeyDown(e) {
@@ -120,7 +123,7 @@ export default function Chronik() {
 }
 
 
-    //NEU
+    //EDIT Chronk
     function handleEditChronik(entry) {
       setEditId(entry.id)
       setEditNSCId(null) // sicherstellen, dass NSC nicht gesetzt ist
@@ -129,7 +132,7 @@ export default function Chronik() {
       setShowPopup(true)
     }
 
-    //NEU
+    //EDIT NSC
   function handleEditNSC(nsc) {
       setEditNSCId(nsc.id)
       setEditId(null) // sicherstellen, dass Chronik nicht gesetzt ist
@@ -137,20 +140,35 @@ export default function Chronik() {
       setSelectedNSC(nsc)
       setShowPopup(true)
     }
-    
+
+    //EDIT Monster
+      const handleEditMonster = (entry) => {
+        setEditId(null)
+        setEditNSCId(null)
+        setSelectedNSC(null)
+        setEntryType('monster')
+        setSelectedMonster(entry)
+        setShowPopup(true)
+      }
 
 
-//NEU
+// Chronik Löschen
 const onDeleteChronikEntry = async (entry) => {
   await deleteChronikEntry(entry)
   await fetchEntries()
 }
 
 
-  //NEU
+  // NSC Löschen
 const handleDeleteNSC = async (entry) => {
   await deleteNSCEntry(entry)
   await fetchNSCs()
+}
+
+// Monster löschen
+const handleDeleteMonster = async (entry) => {
+  await deleteMonsterEntry(entry)
+  await fetchMonsters()
 }
 
     //NEU
@@ -159,6 +177,7 @@ const handleDeleteNSC = async (entry) => {
       setEditId(null)
       setEditNSCId(null)
       setSelectedNSC(null)
+      setSelectedMonster(null)
       setEntryType(type)
 
       let letztesKapitel = ''
@@ -172,8 +191,8 @@ const handleDeleteNSC = async (entry) => {
 
     //NEU
     async function fetchAllEintraege() {
-      await Promise.all([fetchEntries(), fetchNSCs()])
-    }
+        await Promise.all([fetchEntries(), fetchNSCs(), fetchMonsters(), fetchMaps()])
+      }
 
 
   function toggleFlow(id) {
@@ -245,6 +264,15 @@ const handleDeleteNSC = async (entry) => {
         pages.push({ typ: 'map-legend', map: null })
 
 
+
+        
+        //Monster Seiten
+        const ersteMonsterSeite = pages.length
+
+        monster.forEach((monster) => {
+         pages.push({ typ: 'monster', monster, id: `monster-${monster.id}` })
+        })
+
         // ➤ Ggf. Leerseite einfügen, damit Timeline auf linker Seite erscheint
         const totalWithoutTimeline = pages.length
         const needsEmptyPageBeforeTimeline = totalWithoutTimeline % 2 === 0
@@ -254,8 +282,6 @@ const handleDeleteNSC = async (entry) => {
         pages.push({ id: 'timeline', note: '📅 Timeline', flow: '', ort: '', kapitel: '', tags: [] })
 
 /* --- Bookmarks + Helper --- */
-
-        const ersteMonsterSeite = pages.findIndex(p => p?.typ === 'monster-page')
 
         const letzteSeite = pages.length - 1 // Timeline ist letzte Seite
         const letzteChronikSeite = pages.findIndex(p => p?.id === entries.at(-1)?.id)
@@ -451,43 +477,48 @@ return (
 
 
 
-  return (
-    <div key={idx} className="pointer-events-auto">
-      { entry?.id === 'inhalt' ? (
-        
-        <Inhaltsverzeichnis
-          entries={gefilterteEintraege}
-          seitenMap={seitenIndexMap}
-          goToPage={(n) => bookRef.current?.pageFlip().flip(n)}
-        />
-      ) : entry?.id === 'timeline' ? (
-        <TimelinePage
-          entries={entries}
-          seitenMap={seitenIndexMap}
-          goToPage={geheZuSeite}
-        />
-      ) : entry?.typ === 'nsc' || entry?.typ === 'sc' ? (
-        <NSCPage
-          ref={(el) => el && entry?.id && (pageRefs.current[entry.id] = el)}
-          eintrag={entry}
-         // onNSCDelete={handleDeleteNSC}
-          onNSCDelete={(entry) => handleDeleteNSC(entry)}
-          onNSCEdit={handleEditNSC}
-         
-        />
-      ) : (
-        <ChronikPage
+ return (
+  <div key={idx} className="pointer-events-auto">
+    { entry?.id === 'inhalt' ? (
+      <Inhaltsverzeichnis
+        entries={gefilterteEintraege}
+        seitenMap={seitenIndexMap}
+        goToPage={(n) => bookRef.current?.pageFlip().flip(n)}
+      />
+    ) : entry?.id === 'timeline' ? (
+      <TimelinePage
+        entries={entries}
+        seitenMap={seitenIndexMap}
+        goToPage={geheZuSeite}
+      />
+    ) : entry?.typ === 'nsc' || entry?.typ === 'sc' ? (
+      <NSCPage
         ref={(el) => el && entry?.id && (pageRefs.current[entry.id] = el)}
-          entry={entry}
-          idx={idx}
-          visibleFlowIds={visibleFlowIds}
-          toggleFlow={toggleFlow}
-          handleEntryDelete={(entry) => onDeleteChronikEntry(entry)}
-          handleEdit={handleEditChronik}
-        />
-      )}
-    </div>
-  )
+        eintrag={entry}
+        onNSCDelete={(entry) => handleDeleteNSC(entry)}
+        onNSCEdit={handleEditNSC}
+      />
+    ) : entry?.typ === 'monster' ? (
+      <MonsterPage
+        key={entry.id}
+        eintrag={entry.monster}
+        onMonsterDelete={handleDeleteMonster}
+        onMonsterEdit={handleEditMonster}
+        idx={idx}
+      />
+    ) : (
+      <ChronikPage
+        ref={(el) => el && entry?.id && (pageRefs.current[entry.id] = el)}
+        entry={entry}
+        idx={idx}
+        visibleFlowIds={visibleFlowIds}
+        toggleFlow={toggleFlow}
+        handleEntryDelete={(entry) => onDeleteChronikEntry(entry)}
+        handleEdit={handleEditChronik}
+      />
+    )}
+  </div>
+)
 })}
     </HTMLFlipBook>
 
@@ -527,6 +558,8 @@ return (
             editId={editId} 
             editNSCId={editNSCId} 
             refreshEntries={fetchAllEintraege}
+            selectedMonster={selectedMonster}
+            setSelectedMonster={setSelectedMonster}
           />
         
   </>

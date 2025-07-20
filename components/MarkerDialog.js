@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function MarkerDialog({ pos, marker, onClose, onSave }) {
   const [label, setLabel] = useState('')
