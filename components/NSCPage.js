@@ -69,7 +69,7 @@ const sparkleHeader = (emoji, text, colorClass, glowColor) => (
           {char ? (
             <div className="relative border border-blue-700 p-3 rounded bg-[#0f1012] shadow">
               <button onClick={() => onNSCEdit(char)} className="absolute top-2 right-8 text-sm hover:scale-110">✏️</button>
-              <button onClick={() => onNSCDelete(char.id)} className="absolute top-2 right-2 text-sm hover:scale-110">🗑️</button>
+              <button onClick={() => onNSCDelete(char)} className="absolute top-2 right-2 text-sm hover:scale-110">🗑️</button>
               <div className="flex items-start gap-4 mb-2">
                 {char.images?.[0] && <ProfileImage url={char.images[0]} />}
                 <div>

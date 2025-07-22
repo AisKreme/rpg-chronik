@@ -223,7 +223,7 @@ const handleDeleteMonster = async (entry) => {
           pages.push(null) // ❌ Leerseite, damit SCs rechts starten
         }
 
-        // ➤ Spielercharaktere: genau 4 Stück, je 1 pro Seite (2 Doppelseiten)
+        // ➤ Spielercharaktere: genau 6 Stück, je 1 pro Seite (3 Doppelseiten)
         const spielerCharaktere = sortierteNSCs.slice(0, 6)
         const ersteSCSeite = pages.length
         pages.push(...spielerCharaktere.map((nsc, index) => ({

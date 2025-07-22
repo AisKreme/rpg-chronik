@@ -48,7 +48,7 @@ export default function TimelinePage({ entries, seitenMap, goToPage }) {
           >
             📅 {datum}{' '}
             <span className="text-sm text-yellow-500">
-              ({datumsgruppen[datum].length} Eintrag{datumsgruppen[datum].length > 1 ? 'e' : ''})
+              ({datumsgruppen[datum].length} {datumsgruppen[datum].length > 1 ? 'Einträge' : 'Eintrag'})
               
             </span>
           </li>
