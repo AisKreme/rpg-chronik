@@ -18,6 +18,12 @@ const ChronikPage = React.forwardRef(function ChronikPage(
 
 const flowVisible = !!entry?.id && (visibleFlowIds || []).includes(entry.id)
 
+function formatDate(dateString) {
+  if (!dateString) return ''
+  const [year, month, day] = dateString.split('-')
+  return `${day}.${month}.${year}`
+}
+
   return (
   <div
     ref={ref}
@@ -39,7 +45,7 @@ const flowVisible = !!entry?.id && (visibleFlowIds || []).includes(entry.id)
         <div>
           <h3 className="text-lg font-bold text-yellow-300">{entry.kapitel}</h3>
           <p className="text-sm text-yellow-500 font-sans mt-1 mb-2">
-            {entry.date} – {entry.ort}
+            {formatDate(entry.date)} – {entry.ort}
           </p>
         </div>
 
