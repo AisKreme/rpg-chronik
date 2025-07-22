@@ -88,8 +88,9 @@ body {
 }
 
 .page * {
-  margin-bottom: 0.25rem;
+  /* margin-bottom: 0.25rem; */
   box-sizing: border-box;
+    scrollbar-gutter: stable;
 }
 
 /* ✨ Magische Hauptbuttons */

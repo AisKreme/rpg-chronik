@@ -14,126 +14,96 @@ const ChronikPage = React.forwardRef(function ChronikPage(
   ref
 ) {
   const [selectedImage, setSelectedImage] = useState(null)
-  
+
+
+const flowVisible = !!entry?.id && (visibleFlowIds || []).includes(entry.id)
 
   return (
-<div
-  ref={ref}
-  className={`page ${className} !w-auto flex flex-col justify-between px-4 relative`} 
-  data-entry-id={entry?.id}
->
-  {entry ? (
-    <>
-      {/* 🔘 Emoji-Buttons oben rechts */}
-      <div className="absolute top-3 right-5 flex gap-3 z-10">
-        <button
-          onClick={() => toggleFlow(entry.id)}
-          title="Klartext anzeigen/verbergen"
-          className="hover:scale-110 transition-transform duration-200 text-yellow-500 text-lg"
-        >
-          📖
-        </button>
-        <button
-          onClick={() => handleEdit(entry)}
-          title="Bearbeiten"
-          className="hover:scale-110 transition-transform duration-200 text-green-500 text-lg"
-        >
-          ✏️
-        </button>
-        <button
-          onClick={() => handleEntryDelete(entry)}
-          title="Löschen"
-          className="hover:scale-110 transition-transform duration-200 text-red-500 text-lg"
-        >
-          🗑️
-        </button>
+  <div
+    ref={ref}
+    className={`relative w-[420px] h-[530px] border border-yellow-700 bg-[#1a1e24] text-parchment shadow-xl page ${
+      flowVisible ? 'overflow-y-auto' : 'overflow-hidden'
+    }`}
+    data-entry-id={entry?.id}
+  >
+    {entry ? (
+      <div className="flex flex-col h-full justify-between">
+        {/* 🔘 Buttons */}
+        <div className="absolute top-3 right-5 flex gap-3 z-10">
+          <button onClick={() => toggleFlow(entry.id)} title="Klartext" className="hover:scale-110 text-yellow-500">📖</button>
+          <button onClick={() => handleEdit(entry)} title="Bearbeiten" className="hover:scale-110 text-green-500">✏️</button>
+          <button onClick={() => handleEntryDelete(entry)} title="Löschen" className="hover:scale-110 text-red-500">🗑️</button>
+        </div>
+
+        {/* 🧭 Kapitel, Datum, Ort */}
+        <div>
+          <h3 className="text-lg font-bold text-yellow-300">{entry.kapitel}</h3>
+          <p className="text-sm text-yellow-500 font-sans mt-1 mb-2">
+            {entry.date} – {entry.ort}
+          </p>
+        </div>
+
+        {/* 📝 Notizblock */}
+      <div
+        className={`text-sm font-sans text-yellow-100 whitespace-pre-wrap border border-yellow-800 rounded px-2 py-1 ${
+          flowVisible ? '' : 'overflow-y-auto max-h-[340px]'
+        }`}
+      >
+        {entry.note}
       </div>
 
-      <div>
-        {/* <p className="text-xs text-yellow-600">ID: {entry.id}</p>*/}
-        <h3 className="text-lg font-bold text-yellow-300">{entry.kapitel}</h3>
-        <p className="text-sm text-yellow-500 mb-2">
-        <span className="font-sans">
-          {entry.date}
-        </span>
-        {" "}
-        <span>
-          - {entry.ort}
-        </span>
-        </p>
-        {/* ✍️ Notiz */}
-        <div className="max-h-[330px] overflow-y-auto pr-1 text-sm border border-yellow-700 rounded bg-[#fffaf0] text-black p-2 whitespace-pre-wrap font-sans">
-          „{entry.note}“
-        </div>
+        {/* 🔽 Klartext */}
+          <div
+        className={`mt-2 text-sm font-sans text-yellow-400 whitespace-pre-wrap`}
+        style={{ display: flowVisible ? 'block' : 'none' }}
+        data-flow
+      >
+        {entry.flow}
+      </div>
 
-        {/* 📖 Klartext */}
-        <div
-          className={`mt-3 text-black whitespace-pre-wrap text-sm max-h-40 overflow-y-auto pr-1 border border-yellow-700 bg-[#fffaf0] rounded p-2 font-sans ${
-            visibleFlowIds.includes(entry.id) ? '' : 'hidden'
-          }`}
-          data-flow-hidden
-        >
-          {entry.flow}
-        </div>
-
-        {/* 🖼️ Bilder */}
-              {entry.images && entry.images.length > 0 && (
-              <div className="mt-4 grid grid-cols-4 gap-2">
-                {entry.images.map((imgPath, index) => (
-                  <motion.img
-                    key={index}
-                    src={imgPath}
-                    alt={`Bild ${index + 1}`}
-                    onClick={() => setSelectedImage(imgPath)}
-                    className="w-24 h-24 object-cover object-left-top rounded shadow border border-yellow-700 cursor-pointer hover:border-yellow-500"
-                    whileHover={{ scale: 1.05, borderColor: "#facc15" }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                  />
-                ))}
+        {/* 🖼 Bilder */}
+        {entry.images?.length > 0 && (
+          <div className="mt-3 grid grid-cols-4 gap-2">
+            {entry.images.map((img, index) => (
+              <motion.img
+                key={index}
+                src={img}
+                onClick={() => setSelectedImage(img)}
+                className="w-20 h-20 object-cover rounded border border-yellow-700 hover:border-yellow-500 cursor-pointer"
+                whileHover={{ scale: 1.05 }}
+              />
+            ))}
           </div>
         )}
+
+        {/* 📄 Seitenzahl */}
+        <div className="text-center text-xs text-yellow-600 font-sans tracking-wide mt-2 select-none">
+          Seite {idx + 1}
+        </div>
       </div>
-    </>
-  ) : (
-    <div className="text-center text-sm italic text-yellow-500 mt-10">
-      ❌ Kein Eintrag vorhanden.
-    </div>
-  )}
+    ) : (
+      <div className="text-center text-sm italic text-yellow-500 mt-10">❌ Kein Eintrag vorhanden.</div>
+    )}
 
-  {/* 📷 Bildvergrößerung */}
-<AnimatePresence>
-  {selectedImage && (
-    <motion.div
-      className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      onClick={() => setSelectedImage(null)}
-    >
-      <motion.img
-        src={selectedImage}
-        className="max-w-[90%] max-h-[90%] border-4 border-yellow-700 rounded shadow-xl"
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.8, opacity: 0 }}
-        transition={{ duration: 0.3 }}
-      />
-      <button
-        className="absolute top-4 right-4 text-yellow-200 bg-black/70 px-2 rounded"
-        onClick={() => setSelectedImage(null)}
-      >
-        ❌
-      </button>
-    </motion.div>
-  )}
-</AnimatePresence>
-
-  {/* 📄 Seitenzahl */}
-  <div className="absolute bottom-1 left-0 right-0 text-center text-xs text-yellow-600 font-sans tracking-wide select-none">
-    Seite {idx + 1}
+    {/* 📷 Vergrößertes Bild */}
+    <AnimatePresence>
+      {selectedImage && (
+        <motion.div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          onClick={() => setSelectedImage(null)}
+        >
+          <motion.img
+            src={selectedImage}
+            className="max-w-[90%] max-h-[90%] border-4 border-yellow-700 rounded shadow-xl"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+          />
+        </motion.div>
+      )}
+    </AnimatePresence>
   </div>
-</div>
-  )
+)
 })
 
 export default ChronikPage

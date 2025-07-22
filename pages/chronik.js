@@ -491,7 +491,15 @@ return (
         seitenMap={seitenIndexMap}
         goToPage={geheZuSeite}
       />
-    ) : entry?.typ === 'nsc' || entry?.typ === 'sc' ? (
+    ) : !entry || entry.typ === 'empty' ? (
+  <div
+    className="page relative w-[420px] h-[530px] overflow-hidden border border-yellow-700 bg-[#1a1e24] text-parchment p-4 shadow-xl flex items-center justify-center"
+  >
+    <p className="text-yellow-600 text-center italic text-sm">
+      ❌ Kein Eintrag vorhanden.
+    </p>
+  </div>
+) : entry?.typ === 'nsc' || entry?.typ === 'sc' ? (
       <NSCPage
         ref={(el) => el && entry?.id && (pageRefs.current[entry.id] = el)}
         eintrag={entry}
