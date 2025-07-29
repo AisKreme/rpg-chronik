@@ -47,7 +47,7 @@ export default function Inhaltsverzeichnis({ entries, seitenMap, goToPage }) {
             <span
               key={i}
               onClick={() => goToPage(s)}
-              className="cursor-pointer hover:underline hover:text-yellow-300"
+              className="cursor-pointer hover:underline hover:text-yellow-300 font-sans"
             >
               S.{s}{i < uniqueSeiten.length - 1 ? ' | ' : ''}
             </span>
